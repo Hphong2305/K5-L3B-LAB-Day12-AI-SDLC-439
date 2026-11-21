@@ -147,6 +147,7 @@
         ]
       }
     },
-    "score": {"reputation_multiplier": 100}
+    "score": {"reputation_multiplier": 100},
+    "live": {"quan_shift_game_hours": 3, "leftover_lifetime_game_minutes": 30}
   }
 }

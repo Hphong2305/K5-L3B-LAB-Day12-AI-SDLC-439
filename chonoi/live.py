@@ -49,6 +49,8 @@ class LiveGame:
 
     def _reset(self):
         self.session = Session(*self._args)
+        if self.mode == "quan":  # sáng tạo của nhóm, chỉ bật khi chơi trực tiếp (ADR-0001)
+            self.session.sim.enable_live_leftovers()
         self.inputs = LiveInputs()
         self.events = []
         self._saved = False
