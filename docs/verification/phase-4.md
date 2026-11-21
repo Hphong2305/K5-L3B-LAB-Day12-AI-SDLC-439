@@ -13,10 +13,10 @@ Commit kiểm chứng: `55cc8b5` (code). Bằng chứng: [`docs/proof/phase-4/`]
 | AC-P4-07 | Gói chạy được, đính kèm Release `v1.0.0` | `git archive` commit bàn giao thành `.zip`, giải nén, chạy lệnh 3 | release notes | **CHỜ** — gói tạo ở commit bàn giao; Release phải tạo trên GitHub web (máy không có `gh`) |
 | AC-P4-08 | Regression P1–P3 còn hiệu lực | Toàn bộ unittest; test P3 không bị skip ở v1.3 (đổi điều kiện `>= 1.2`) | [p4_full_test.log](../proof/phase-4/p4_full_test.log) | **ĐẠT** — 115/115 |
 | AC-P4-09 | README, CHANGELOG, CREDITS, LICENSE, release notes | Rà file | [README](../../README.md), [CHANGELOG](../../CHANGELOG.md), [CREDITS](../../CREDITS.md), [LICENSE](../../LICENSE), [release notes](../release-notes-v1.0.0.md) | **ĐẠT** |
-| AC-P4-10 | Đủ 5 `docs/members/<handle>.md`, mỗi file ≤ 200 từ | Đếm file và số từ | `docs/members/` | **CHƯA ĐẠT** — thiếu TV1, TV2 (`thangdktd`), TV3 (`daohiep2903`); `vuhieuvh.md` ~613 từ (> 200) |
+| AC-P4-10 | Đủ 5 `docs/members/<handle>.md`, mỗi file ≤ 200 từ | Đếm file và số từ | `docs/members/` | **CHƯA ĐẠT** — còn thiếu bản phản tư của TV1 (`phong`); bốn bản hiện có đều ≤ 200 từ |
 | AC-P4-11 | Tag `phase-4` và Release `v1.0.0` cùng SHA trên `main`, đúng hạn | `git ls-remote --tags` | — | **CHỜ** nhóm trưởng xác nhận đẩy |
 
 ## Đánh giá ngắn
 - Đạt: manifest v1.3, bench có render, soak 10 ngày, 3 cảnh báo + tương phản cao, regression 115/115, tài liệu phát hành.
-- Chưa đạt / chờ: phản tư của 3 thành viên và độ dài `vuhieuvh.md`; thử clone sạch trên macOS/Linux; Release + gói đính kèm phải tạo trên GitHub web.
+- Chưa đạt / chờ: phản tư của TV1; thử clone sạch trên macOS/Linux; Release + gói đính kèm phải tạo trên GitHub web.
 - Ghi chú: tag `phase-3` chưa từng được gắn; code Phase 3 (nhánh `vuhieuvh-phase3`) được tích hợp vào `main` ở đầu Phase 4.

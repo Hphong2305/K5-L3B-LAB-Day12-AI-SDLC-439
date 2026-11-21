@@ -1,6 +1,6 @@
 # NTLam108 — phản tư cá nhân (≤ 200 từ)
 
-TV4, Developer Quán (Phase 1: Lát 4; Phase 2: mode `day`).
+TV4, Developer Quán.
 
 - **Tôi đã làm (kèm link commit):**
   - Phase 1: chốt phân vùng `quan.py` với TV3 ([f3331af](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/f3331af)). Lát 4 (bếp, bưng, phục vụ, tiền, boa, uy tín), ghép `step()`, script E2E ([45c7733](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/45c7733)). Sửa thời hạn món thừa, ADR-0001 ([070ab9b](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/070ab9b)).

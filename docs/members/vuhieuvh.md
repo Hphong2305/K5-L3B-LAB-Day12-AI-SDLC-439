@@ -1,44 +1,6 @@
-# vuhieuvh — phản tư cá nhân (≤ 200 từ)
+# vuhieuvh — phản tư cá nhân
 
-## Phase 1
-- **Tôi đã làm (kèm link commit):**
-  - Khởi tạo khung ma trận kiểm thử Phase 1 ([docs/verification/phase-1.md](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/verification/phase-1.md)).
-  - Chuẩn bị sẵn bộ kịch bản test handoff kho hai tiến trình ([dock.json](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-1/dock.json), [dock-inputs.json](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-1/dock-inputs.json)).
-  - Chạy kiểm thử xác thực độc lập cho Lát 1 (bơi, oxy, ngạt, ngất, giỏ) và Lát 2 (hái rau, bắt cá, hồi chiêu, cập bến xuất kho) với 45/45 test toàn dự án đạt ([lat1_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-1/lat1_test.log), [lat2_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-1/lat2_test.log)).
-- **Tôi đã review (kèm link):**
-  - Review commit `e07352e` của TV1 (`feat(gather): finalize team, contracts and implement Lat 1`): đạt 5/5 unit test.
-  - Review commit `38e08b2` & `fb5a133` của TV2 (`thangdktd`): xác nhận Lát 2 hái/bắt cá hoạt động chính xác và handoff file kho thành công.
-- **AI sai ở đâu và tôi phát hiện thế nào:**
-  - AI ban đầu chưa cấu hình tương thích lệnh `python3` trên Windows dẫn đến mã lỗi 9009; tôi phát hiện qua log unittest và khắc phục.
-- **Điều tôi học được:**
-  - Tầm quan trọng của việc kiểm thử liên tục từng lát cắt (Continuous Testing) giúp phát hiện xung đột sớm và giữ nhánh chính luôn ổn định.
-
-## Phase 2
-- **Tôi đã làm (kèm link commit):**
-  - Khởi tạo ma trận kiểm chứng Phase 2 với 12 tiêu chí AC-P2-01 đến AC-P2-12 ([docs/verification/phase-2.md](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/verification/phase-2.md)).
-  - Nâng cấp giao diện trực quan Cá Sấu giải phẫu chi tiết (thân vảy, mõm, răng nanh, gờ mắt, chân màng bơi, đuôi) và hiệu ứng vòng tuần tra/truy đuổi trên [chonoi/web/index.html](file:///e:/ai_thuc_chien/day_12_thuc_hanh/chonoi/web/index.html).
-  - Tích hợp và chạy kiểm thử toàn bộ 5 lát cắt của cả nhóm: 78/78 tests toàn dự án đạt 100% ([p2_full_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-2/p2_full_test.log)), nghiệm thu tính tất định vòng ngày `--mode day` ([day_smoke.jsonl](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-2/day_smoke.jsonl)).
-- **Tôi đã review (kèm link):**
-  - Review commit `d24284f` của TV1 (Cá Sấu M1/M2: patrol, chase, hit, recoil, LIFO hold loss).
-  - Review commit `9d7d6a1` của TV2 (Đàn cá di chuyển, va chạm biên đổi hướng, spawn định kỳ).
-  - Review commit `1cfdc46` của TV3 (Lọc thực đơn Quán theo `day_plan`).
-  - Review commit `c82f599` của TV4 (Vòng đời `--mode day`, shop nâng cấp, pause).
-- **AI sai ở đâu và tôi phát hiện thế nào:**
-  - AI khai báo trùng biến `const p` trong hàm vẽ canvas gây ra lỗi màn hình đen; tôi dùng `node -c` và DevTools để bắt lỗi cú pháp và sửa ngay.
-- **Điều tôi học được:**
-  - Đảm bảo tách biệt rõ ràng giữa logic mô phỏng contract và tầng trình diễn giao diện Web giúp game vừa sinh động vừa đảm bảo tuyệt đối tính tất định headless.
-
-## Phase 3
-- **Tôi đã làm (kèm link commit):**
-  - Lập ma trận kiểm thử Phase 3 gồm 10 tiêu chí AC-P3-01 đến AC-P3-10 ([docs/verification/phase-3.md](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/verification/phase-3.md)).
-  - Nâng cấp HUD Web Canvas ([chonoi/web/index.html](file:///e:/ai_thuc_chien/day_12_thuc_hanh/chonoi/web/index.html)): Hiển thị thanh độ tươi đổi màu (xanh/vàng/đỏ) và biểu tượng cảnh báo hàng ươn ⚠️ cho cá và khoang giỏ/kho.
-  - Viết bộ test độc lập `tests/test_phase3_qa.py`; phát hiện và báo lỗi 2 ca test hồi quy cho TV3, TV4; chạy nghiệm thu toàn bộ 103/103 tests PASS ([p3_full_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-3/p3_full_test.log)) và tính tất định `--mode day --days 2` ([day_smoke.jsonl](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-3/day_smoke.jsonl)).
-- **Tôi đã review (kèm link):**
-  - Review commit `d9fd71a` của TV1 (Contract v1.2, kho cá thể, độ tươi và dòng lũ `current`).
-  - Review commit `5252728` của TV2 (Bảo toàn ID cá thể khi hái/bắt và handoff).
-  - Review commit `41cfd1a` / `b5f925c` của TV3 (Kho cá thể Quán, reserve theo ID, re-reserve khi ươn).
-  - Review commit `5021ada` của TV4 (Định giá món ăn và tip theo độ tươi, sửa test mode day v1.2).
-- **AI sai ở đâu và tôi phát hiện thế nào:**
-  - Khi merge nhánh TV4 vào TV5 có xung đột cú pháp ở hàm tóm tắt kho; tôi dùng `node -c` kiểm tra cú pháp JS để hợp nhất mượt mà cả độ tươi lẫn cảnh báo hàng ươn.
-- **Điều tôi học được:**
-  - Khi schema kho chuyển từ đếm số lượng sang danh sách cá thể có ID, việc phát hiện lỗi hồi quy sớm ở các test phụ thuộc là chìa khóa giúp cả đội không bị tắc nghẽn.
+- **Tôi đã làm:** Lập ma trận kiểm thử Phase 1–3, chuẩn bị kịch bản bàn giao kho, vẽ Cá Sấu và bổ sung hiển thị độ tươi. Chạy 103/103 test Phase 3. [QA Phase 2](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/1bec08d), [QA Phase 3](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/9ea93fc).
+- **Tôi đã review:** Kiểm tra chuyển đổi kho cá thể của TV3 và giá theo độ tươi của TV4. [TV3](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/b5f925c), [TV4](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/5021ada).
+- **AI sai ở đâu và tôi phát hiện thế nào:** AI khai báo trùng biến `const p` trong hàm vẽ canvas, làm màn hình đen. Tôi dùng `node -c` và DevTools để tìm và sửa lỗi.
+- **Điều tôi học được:** Chạy hồi quy ngay khi đổi schema kho và kiểm tra cú pháp JavaScript sau khi ghép HUD.

@@ -1,0 +1,6 @@
+# daohiep2903 — phản tư cá nhân
+
+- **Tôi đã làm:** Phase 1, xây dựng luồng khách gọi món, giữ nguyên liệu và hết kiên nhẫn. Phase 2, lọc món theo kế hoạch ngày. Phase 3, chuyển kho sang cá thể v1.2, giữ theo ID, xử lý nguyên liệu ươn và kiểm tra tích hợp 89/89 test. [Phase 1](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/78ab793), [Phase 2](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/1cfdc46), [Phase 3](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/41cfd1a), [kiểm thử tích hợp](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/b5f925c).
+- **Tôi đã review:** Rà thứ tự `step()` của TV4 và chạy lại ca khách rời sau khi bếp nhận đơn. Món vẫn nằm trên tay đến hết ca. [Bản ghép của TV4](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/45c7733).
+- **AI sai ở đâu và tôi phát hiện thế nào:** Bản đầu tính 30 phút game thành 30 phút mô phỏng. Khi so với ca dài 180 giây, tôi thấy món không thể hết hạn trong một ca. TV4 sửa quy đổi thành 1.800 tick. [Commit sửa](https://github.com/Hphong2305/K5-L3B-LAB-Day12-AI-SDLC-439/commit/070ab9b).
+- **Điều tôi học được:** Chốt đơn vị thời gian và cấu trúc dữ liệu trước khi ghép. Chạy smoke qua ranh giới Gather → Quán để kiểm tra dữ liệu bàn giao.
