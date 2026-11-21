@@ -87,7 +87,10 @@ class TestGatherLat1(unittest.TestCase):
         with Workdir() as w:
             sc = write_json(w.path("sc.json"), {"gather": {
                 "player": {"pos": [20, 5], "oxygen_ticks": 0, "zero_oxy_ticks": 59, "hp": 1},
-                "hold": ["ca_loc", "bong_sung"]
+                "hold": [
+                    {"id": "I1", "kind": "ca_loc", "fresh": 100},
+                    {"id": "I2", "kind": "bong_sung", "fresh": 100},
+                ]
             }})
             inv = w.path("inv.json")
             code, err = run_headless("--mode", "gather", "--seed", "1", "--ticks", "10",
@@ -95,15 +98,17 @@ class TestGatherLat1(unittest.TestCase):
             self.assertEqual(code, 0, err)
             rows = read_jsonl(w.path("out.jsonl"))
             # Event faint và gather_end
-            self.assertEqual(len(events(rows, "faint")), 1)
+            faint_evs = events(rows, "faint")
+            self.assertEqual(len(faint_evs), 1)
+            self.assertEqual([it["id"] for it in faint_evs[0]["data"]["lost"]], ["I2", "I1"])
             end_evs = events(rows, "gather_end")
             self.assertEqual(len(end_evs), 1)
             self.assertEqual(end_evs[0]["data"]["reason"], "fainted")
-            self.assertEqual(end_evs[0]["data"]["inventory"], {"items": {}})
+            self.assertEqual(end_evs[0]["data"]["inventory"], {"items": []})
             # File kho xuất ra rỗng
             self.assertTrue(os.path.exists(inv))
             with open(inv, encoding="utf-8") as f:
-                self.assertEqual(json.load(f), {"items": {}})
+                self.assertEqual(json.load(f), {"items": []})
 
 
 if __name__ == "__main__":
