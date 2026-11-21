@@ -3,6 +3,7 @@ import unittest
 from chonoi.contract import load_contract
 from chonoi.inputs import LiveInputs
 from chonoi.runner import Session
+from test_quan_customers import ingredient
 
 
 class QuanDayMenu(unittest.TestCase):
@@ -20,17 +21,18 @@ class QuanDayMenu(unittest.TestCase):
 
     def test_day_menu_filters_before_reserving_ingredients(self):
         session, event = self.first_arrival(
-            inventory={"ca_keo": 2, "ca_loc": 1}, day_dishes=self.day_dishes
+            inventory=[ingredient("I1", "ca_keo"), ingredient("I2", "ca_keo"),
+                       ingredient("I3", "ca_loc")], day_dishes=self.day_dishes
         )
         self.assertEqual(event["name"], "customer_arrived")
         self.assertEqual(event["data"]["dish_id"], "ca_loc_nuong_trui")
-        self.assertEqual(session.sim.available_stock(), {"ca_keo": 2, "ca_loc": 0})
+        self.assertEqual([item["id"] for item in session.sim.available_stock()], ["I1", "I2"])
         self.assertEqual(len(session.snapshot()["stoves"]), 2)
         self.assertEqual(len(session.snapshot()["tables"]), 4)
         self.assertEqual(len(session.sim.menu), 6)
 
     def test_standalone_can_order_dish_excluded_by_day(self):
-        inventory = {"ca_keo": 2}
+        inventory = [ingredient("I1", "ca_keo"), ingredient("I2", "ca_keo")]
         _, day_event = self.first_arrival(inventory=inventory, day_dishes=self.day_dishes)
         _, standalone_event = self.first_arrival(inventory=inventory)
         self.assertEqual(day_event["name"], "no_dish")
