@@ -110,7 +110,7 @@ class DayMode(unittest.TestCase):
         ]
         sim.step(press("interact"))  # đứng ở bến -> docked
         self.assertEqual(sim.phase, "quan")
-        self.assertEqual(sim.sub.stock, [
+        self.assertEqual(sim.sub.snapshot()["stock"], [
             {"id": "I1", "kind": "ca_loc", "fresh": 99.992},
             {"id": "I2", "kind": "bong_sung", "fresh": 99.992},
             {"id": "I3", "kind": "bong_sung", "fresh": 99.992},

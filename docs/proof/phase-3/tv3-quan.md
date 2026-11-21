@@ -17,3 +17,7 @@ python -m unittest test_quan_customers test_quan_day_menu -v
 `_consume_reserved(customer)` xóa và trả về đúng các nguyên liệu đã giữ, với `fresh` dạng `Fraction` tại thời điểm bếp lấy. TV4 có thể dùng giá trị trả về để chốt giá.
 
 Bản triển khai xử lý hao tươi sau bước giảm kiên nhẫn và trước tương tác bếp. Khi độ tươi bằng nhau, chọn ID nhỏ hơn theo `sort_by_id`. Mỗi đơn có tối đa một lần giữ lại trong vòng đời của đơn. Đơn `unfulfillable` tiếp tục đếm kiên nhẫn và bếp bỏ qua. Cần đối chiếu các lựa chọn này với bản đầy đủ TICKET-03/Test Contract v1.2.
+
+## Kiểm tra sau khi ghép `origin/main` tại c146914
+
+Day handoff dùng snapshot để kiểm độ tươi dạng JSON; test món thừa kiểm `reserved` và `stock` là mảng. Ba test đích cho Day, smoke Gather → Quán và món thừa đều đạt. Chạy lại `python -m unittest discover -s tests` với Python UTF-8 và Windows launcher `python3.exe` trong PATH tạm cho kết quả **89/89 đạt**.
