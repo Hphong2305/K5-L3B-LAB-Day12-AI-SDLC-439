@@ -1,6 +1,6 @@
 # TEAM
 
-**Tên nhóm:** Nhóm 05  **Số người:** 5  (khớp `team_size` trong `game.contract.json`)
+**Tên nhóm:** 439  **Số người:** 5  (khớp `team_size` trong `game.contract.json`)
 
 | Thành viên | GitHub handle | Module chính | Vai quy trình | Người dự phòng cho |
 |---|---|---|---|---|
@@ -14,7 +14,7 @@
 
 ## Thỏa thuận làm việc nhóm (chốt T+0–15)
 
-- Kênh liên lạc: Discord / Zalo nhóm 05.
+- Kênh liên lạc: Discord / Zalo 439.
 - Khi bất đồng về thiết kế: Trao đổi nhanh ≤ 2 phút; nếu chưa thống nhất thì Integrator (TV1) quyết định theo Test Contract và ghi lại lý do.
 - Khi ai đó trễ hoặc vướng quá 10 phút: Báo ngay lên kênh chung, người dự phòng lập tức nhận việc hỗ trợ.
 - Giờ standup: T+20 rà soát blocker giữa Phase 1.
