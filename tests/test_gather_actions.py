@@ -67,7 +67,10 @@ class GatherActions(unittest.TestCase):
     def test_catch_at_inclusive_radius_yields_and_applies_cooldown(self):
         sim = build_sim(
             player={"pos": [20, 10]},
-            fish=[{"id": "F1", "kind": "ca_linh", "pos": [20, 12]}],
+            fish=[
+                {"id": "F1", "kind": "ca_linh", "pos": [20, 12]},
+                {"id": "F2", "kind": "ca_linh", "pos": [20.8, 11.9], "heading_deg": 180},
+            ],
         )
 
         events = sim.step(pressed("catch"))
@@ -77,11 +80,14 @@ class GatherActions(unittest.TestCase):
         self.assertEqual(events[0][1]["yield"], 3)
         self.assertEqual(sim.hold, ["ca_linh"] * 3)
         self.assertEqual(sim.catch_cd_ticks, 30)
+        self.assertEqual([fish["id"] for fish in sim.fish], ["F2"])
 
         for _ in range(29):
             sim.step(InputState((0.0, 0.0), {}, set()))
         self.assertEqual(sim.catch_cd_ticks, 1)
-        self.assertEqual(sim.step(pressed("catch"))[0][0], "fish_caught")
+        next_events = sim.step(pressed("catch"))
+        self.assertEqual(next_events[0][0], "fish_caught")
+        self.assertEqual(next_events[0][1]["fish_id"], "F2")
 
     def test_catch_requires_underwater_and_enough_capacity(self):
         sim = build_sim(
