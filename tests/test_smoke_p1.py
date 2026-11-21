@@ -198,6 +198,60 @@ class Movement(unittest.TestCase):
 
 
 class Integration(unittest.TestCase):
+    def test_gather_actions_are_emitted_in_jsonl_and_handed_off(self):
+        with Workdir() as w:
+            sc = write_json(w.path("gather.json"), {
+                "gather": {
+                    "player": {"pos": [20, 0]},
+                    "nodes": [{"id": "N1", "kind": "bong_sung", "pos": [20, 0]}],
+                    "time_left_ticks": 1,
+                }
+            })
+            inp = write_json(w.path("in.json"), frames({"tick": 0, "interact": True}))
+            inv = w.path("inv.json")
+            code, err = run_headless(
+                "--mode", "gather", "--seed", "1", "--ticks", "1", "--scenario", sc,
+                "--inputs", inp, "--inventory-out", inv, "--out", w.path("g.jsonl"),
+            )
+            self.assertEqual(code, 0, err)
+
+            rows = read_jsonl(w.path("g.jsonl"))
+            self.assertEqual([row["name"] for row in events(rows)], ["gather", "gather_end"])
+            self.assertEqual(events(rows, "gather")[0]["data"], {
+                "node_id": "N1", "kind": "bong_sung", "yield": 1,
+            })
+            self.assertEqual(events(rows, "gather_end")[0]["data"]["inventory"],
+                             {"items": {"bong_sung": 1}})
+            with open(inv, encoding="utf-8") as f:
+                self.assertEqual(json.load(f), {"items": {"bong_sung": 1}})
+
+            code, err = run_headless("--mode", "quan", "--seed", "1", "--ticks", "0", "--inventory", inv,
+                                     "--out", w.path("q.jsonl"))
+            self.assertEqual(code, 0, err)
+            self.assertEqual(snapshots(read_jsonl(w.path("q.jsonl")))[0]["stock"], {"bong_sung": 1})
+
+    def test_fish_catch_is_emitted_in_jsonl(self):
+        with Workdir() as w:
+            sc = write_json(w.path("gather.json"), {
+                "gather": {
+                    "player": {"pos": [20, 10]},
+                    "fish": [{"id": "F1", "kind": "ca_linh", "pos": [20, 12]}],
+                    "time_left_ticks": 1,
+                }
+            })
+            inp = write_json(w.path("in.json"), frames({"tick": 0, "catch": True}))
+            code, err = run_headless(
+                "--mode", "gather", "--seed", "1", "--ticks", "1", "--scenario", sc,
+                "--inputs", inp, "--out", w.path("g.jsonl"),
+            )
+            self.assertEqual(code, 0, err)
+            rows = read_jsonl(w.path("g.jsonl"))
+            self.assertEqual(events(rows, "fish_caught")[0]["data"], {
+                "fish_id": "F1", "kind": "ca_linh", "yield": 3,
+            })
+            self.assertEqual(events(rows, "gather_end")[0]["data"]["inventory"],
+                             {"items": {"ca_linh": 3}})
+
     def test_inv_01_gather_writes_inventory_quan_reads_it(self):
         """Ví dụ smoke test trong PRD-0 mục G: cập bến ở tick 0, quán đọc kho đúng nội dung."""
         with Workdir() as w:
@@ -226,6 +280,14 @@ class Integration(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertFalse(os.path.exists(inv))
             self.assertEqual(read_jsonl(w.path("r.jsonl"))[-1]["reason"], "tick_limit")
+
+            with open(inv, "w", encoding="utf-8") as f:
+                f.write('{"items":{"ca_loc":9}}\n')
+            code, _ = run_headless("--mode", "gather", "--seed", "1", "--ticks", "5", "--inventory-out", inv,
+                                   "--out", w.path("r.jsonl"))
+            self.assertEqual(code, 0)
+            with open(inv, encoding="utf-8") as f:
+                self.assertEqual(json.load(f), {"items": {"ca_loc": 9}})
 
     def test_inv_bad_schema_exit_2(self):
         with Workdir() as w:
