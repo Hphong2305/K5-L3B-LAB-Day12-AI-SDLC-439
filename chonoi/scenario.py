@@ -136,8 +136,16 @@ def _validate_gather(b, tuning):
         _pos(f"fish.{f['id']}.pos", f.get("pos"), bounds)
         if f["pos"][1] <= g["surface_depth"]:
             raise BadInput(f"fish.{f['id']}: đàn cá phải ở dưới nước")
+        x_bounds = g.get("fish_x", bounds["x"])
+        if not x_bounds[0] <= f["pos"][0] <= x_bounds[1]:
+            raise BadInput(f"fish.{f['id']}: x nằm ngoài vùng bơi")
+        depth_bounds = g.get("fish_depths", {}).get(f["kind"])
+        if depth_bounds and not depth_bounds[0] <= f["pos"][1] <= depth_bounds[1]:
+            raise BadInput(f"fish.{f['id']}: d nằm ngoài vùng bơi của loài")
         if "heading_deg" in f and not _num(f["heading_deg"]):
             raise BadInput(f"fish.{f['id']}.heading_deg phải là số")
+        if "age_ticks" in f:
+            _nonneg_int(f"fish.{f['id']}.age_ticks", f["age_ticks"])
 
 
 def _validate_quan(b, tuning):

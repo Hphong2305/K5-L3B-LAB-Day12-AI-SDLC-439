@@ -24,6 +24,9 @@ class QuanSim:
         self.rng = streams
         self.ids = ids
         self.tick = 0
+        self._tuning = tuning
+        self.leftover_lifetime_ticks = None  # None = tắt (headless); bật qua enable_live_leftovers()
+        self.stored_dishes = []
         tick_hz = tuning["tick_hz"]
         self.patience_ticks = round(t["patience_s"] * tick_hz)
         self.customer_interval_ticks = round(t["customer_interval_s"] * tick_hz)
@@ -99,7 +102,7 @@ class QuanSim:
 
     def snapshot(self) -> dict:
         occupied = {c["table_id"]: c["id"] for c in self.customers}
-        return {
+        snapshot = {
             "player": {"pos": self.pos},
             "stock": {k: self.stock[k] for k in sorted(self.stock) if self.stock[k] > 0},
             "hand": self.hand,
@@ -108,6 +111,9 @@ class QuanSim:
             "tables": [{"id": tb["id"], "pos": tb["pos"], "customer_id": occupied.get(tb["id"])} for tb in self.tables],
             "customers": sort_by_id(self.customers),
         }
+        if self.leftover_lifetime_ticks is not None:
+            snapshot["stored_dishes"] = list(self.stored_dishes)
+        return snapshot
 
     def step(self, inp):
         """Thứ tự 8 bước theo docs/plan/phase-1-tv3-tv4.md (chờ đối chiếu mục F, clarify Q6)."""
@@ -117,6 +123,8 @@ class QuanSim:
         self.time_left_ticks = max(0, self.time_left_ticks - 1)
         # 2. TV3: giảm kiên nhẫn, khách hết kiên nhẫn -> customer_left, nhả reserved
         self._update_customer_patience(events)
+        if self.leftover_lifetime_ticks is not None:
+            self._expire_leftovers(events)
         # 3. TV4: bếp đếm nấu, chín -> ready
         self._tick_stoves(events)
         # 4. TV4: khách ăn xong -> trả tiền
@@ -198,9 +206,12 @@ class QuanSim:
                    if c.get("state") == "waiting" and c.get("order_id") not in taken]
         if not waiting:
             return None
-        return min(waiting, key=lambda c: (c.get("order_tick", 0), c.get("order_id", "")))
+        return min(sort_by_id(waiting, key=lambda c: c.get("order_id") or ""),
+                   key=lambda c: c.get("order_tick", 0))
 
     def _stove_interact(self, s, events):
+        if self.leftover_lifetime_ticks is not None and self._interact_with_leftovers(events):
+            return
         if s["state"] == "idle":
             c = self._next_order()
             if c is None:
@@ -222,9 +233,62 @@ class QuanSim:
             # carry_limit = 1: tay trống mới bưng được.
             # TODO(TV4, mục F): định dạng `hand` trong snapshot (chuỗi mã món hay object có order_id).
             self.hand = {"dish_id": s["dish"], "order_id": s.get("order_id")}
+            if self.leftover_lifetime_ticks is not None:
+                self.hand["expires_at_tick"] = self.tick + self.leftover_lifetime_ticks
             events.append(("dish_picked", {"stove_id": s["id"], "dish_id": s["dish"],
                                            "order_id": s.get("order_id")}))
             s.update(state="idle", dish=None, order_id=None, cook_ticks_left=0, ready_ticks=0)
+
+    def enable_live_leftovers(self):
+        """Sáng tạo của nhóm (ADR-0001), chỉ chonoi.live gọi: bật bảo quản món thừa.
+
+        Đổi thời gian game sang tick theo tuning.live: một ca `quan.duration_s` giây thật
+        ứng với `quan_shift_game_hours` giờ game. Với 180 s / 3 giờ: 1 phút game = 1 s,
+        nên 30 phút game = 30 s = 1800 tick.
+        """
+        live = self._tuning["live"]
+        seconds_per_game_minute = self.t["duration_s"] / (live["quan_shift_game_hours"] * 60)
+        self.leftover_lifetime_ticks = int(round(
+            live["leftover_lifetime_game_minutes"] * seconds_per_game_minute * self._tuning["tick_hz"]))
+
+    def _has_live_order(self, dish):
+        order_id = dish.get("order_id")
+        return order_id is not None and any(
+            c.get("order_id") == order_id and c["state"] == "assigned" for c in self.customers
+        )
+
+    def _expire_leftovers(self, events):
+        for dish in self.stored_dishes[:]:
+            if self.tick >= dish["expires_at_tick"] and not self._has_live_order(dish):
+                self.stored_dishes.remove(dish)
+                events.append(("dish_discarded", {"dish_id": dish["dish_id"]}))
+        if isinstance(self.hand, dict) and "expires_at_tick" in self.hand:
+            if self.tick >= self.hand["expires_at_tick"] and not self._has_live_order(self.hand):
+                events.append(("dish_discarded", {"dish_id": self.hand["dish_id"]}))
+                self.hand = None
+
+    def _interact_with_leftovers(self, events):
+        if self.hand is None:
+            for dish in self.stored_dishes:
+                if self._has_live_order(dish):
+                    self.hand = dish
+                    self.stored_dishes.remove(dish)
+                    events.append(("dish_picked", {"dish_id": dish["dish_id"],
+                                                   "order_id": dish["order_id"]}))
+                    return True
+        elif isinstance(self.hand, dict) and "expires_at_tick" in self.hand and not self._has_live_order(self.hand):
+            dish = self.hand
+            self.hand = None
+            dish["order_id"] = None
+            waiting = self._next_order()
+            if waiting is not None and waiting.get("dish_id") == dish["dish_id"]:
+                waiting["reserved"].clear()
+                waiting["state"] = "assigned"
+                dish["order_id"] = waiting["order_id"]
+            self.stored_dishes.append(dish)
+            events.append(("dish_stored", {"dish_id": dish["dish_id"]}))
+            return True
+        return False
 
     def _table_interact(self, tb, events):
         c = self._customer_at(tb["id"])
@@ -295,8 +359,11 @@ class QuanSim:
         if table is None:
             return
         available = self.available_stock()
+        reusable = {dish["dish_id"]: dish for dish in reversed(self.stored_dishes)
+                    if not self._has_live_order(dish)}
         dishes = [dish_id for dish_id, dish in sorted(self.menu.items())
-                  if all(available.get(kind, 0) >= amount for kind, amount in dish["recipe"].items())]
+                  if dish_id in reusable
+                  or all(available.get(kind, 0) >= amount for kind, amount in dish["recipe"].items())]
         if not dishes:
             events.append(("no_dish", {"table_id": table["id"]}))
             return
@@ -311,6 +378,10 @@ class QuanSim:
             "patience_ticks_left": self.patience_ticks,
             "reserved": dict(self.menu[dish_id]["recipe"]),
         }
+        if dish_id in reusable:
+            reusable[dish_id]["order_id"] = customer["order_id"]
+            customer["state"] = "assigned"
+            customer["reserved"] = {}
         self.customers.append(customer)
         events.append(("customer_arrived", {"customer_id": customer["id"],
                                             "table_id": customer["table_id"],
