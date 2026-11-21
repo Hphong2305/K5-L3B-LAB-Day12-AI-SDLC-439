@@ -76,7 +76,12 @@ class TestGatherMonsters(unittest.TestCase):
         with Workdir() as w:
             sc = write_json(w.path("sc.json"), {"gather": {
                 "player": {"pos": [60.0, 23.5]},  # cách [60, 24] đúng 0.5m <= 1.5m
-                "hold": ["ca_loc", "ca_linh", "ca_keo", "bong_dien_dien"]  # 4 món
+                "hold": [
+                    {"id": "I1", "kind": "ca_loc", "fresh": 100},
+                    {"id": "I2", "kind": "ca_linh", "fresh": 100},
+                    {"id": "I3", "kind": "ca_keo", "fresh": 100},
+                    {"id": "I4", "kind": "bong_dien_dien", "fresh": 100},
+                ]  # 4 món
             }})
             code, err = run_headless("--mode", "gather", "--seed", "1", "--ticks", "1",
                                      "--scenario", sc, "--out", w.path("hit.jsonl"))
@@ -88,12 +93,13 @@ class TestGatherMonsters(unittest.TestCase):
             self.assertEqual(hit_data["monster_id"], "M1")
             self.assertEqual(hit_data["hp"], 2)  # 3 - 1 = 2
             # Bỏ floor(4/2) = 2 món theo LIFO (nhặt sau mất trước)
-            self.assertEqual(hit_data["lost"], ["bong_dien_dien", "ca_keo"])
+            self.assertEqual([it["id"] for it in hit_data["lost"]], ["I4", "I3"])
+            self.assertEqual([it["kind"] for it in hit_data["lost"]], ["bong_dien_dien", "ca_keo"])
 
             snap = snapshots(rows)[-1]
             self.assertEqual(snap["player"]["hp"], 2)
             self.assertEqual(snap["player"]["invuln_ticks"], 90)
-            self.assertEqual(snap["hold"], ["ca_loc", "ca_linh"])
+            self.assertEqual([it["id"] for it in snap["hold"]], ["I1", "I2"])
 
             # Quái vào recoil
             m1 = snap["monsters"][0]
@@ -105,7 +111,10 @@ class TestGatherMonsters(unittest.TestCase):
         with Workdir() as w:
             sc = write_json(w.path("sc.json"), {"gather": {
                 "player": {"pos": [60.0, 23.5], "hp": 1},
-                "hold": ["ca_loc", "ca_linh"]
+                "hold": [
+                    {"id": "I1", "kind": "ca_loc", "fresh": 100},
+                    {"id": "I2", "kind": "ca_linh", "fresh": 100},
+                ]
             }})
             inv = w.path("inv.json")
             code, err = run_headless("--mode", "gather", "--seed", "1", "--ticks", "10",
@@ -116,11 +125,12 @@ class TestGatherMonsters(unittest.TestCase):
             self.assertEqual(len(faint_evs), 1)
             self.assertEqual(faint_evs[0]["data"]["cause"], "monster")
             self.assertEqual(faint_evs[0]["data"]["hp"], 0)
+            self.assertEqual([it["id"] for it in faint_evs[0]["data"]["lost"]], ["I1"])
 
             end_evs = events(rows, "gather_end")
             self.assertEqual(len(end_evs), 1)
             self.assertEqual(end_evs[0]["data"]["reason"], "fainted")
-            self.assertEqual(end_evs[0]["data"]["inventory"], {"items": {}})
+            self.assertEqual(end_evs[0]["data"]["inventory"], {"items": []})
 
 
 if __name__ == "__main__":
