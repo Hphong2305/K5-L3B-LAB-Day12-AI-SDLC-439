@@ -28,15 +28,18 @@ UPGRADE_KEYS = {"oxygen": "oxygen_max_s", "hp": "hp_max"}
 class DaySim:
     mode = "day"
 
-    def __init__(self, tuning, scenario, streams, ids, days=1):
+    def __init__(self, tuning, scenario, streams, ids, days=1, cycle_plans=False):
         plans = tuning["day_plan"]
-        if not isinstance(days, int) or isinstance(days, bool) or not (1 <= days <= len(plans)):
+        # cycle_plans: chỉ soak (v1.3) dùng — ngày 6..N lặp lại kế hoạch D1..D5; --mode day vẫn 1..5
+        max_days = None if cycle_plans else len(plans)
+        if not isinstance(days, int) or isinstance(days, bool) or days < 1 or (max_days and days > max_days):
             raise BadInput(f"--days phải trong [1, {len(plans)}]")
         if scenario:
             # TODO(TV4, TICKET-02): scenario cho mode day (bắt đầu giữa ngày, có sẵn tiền/nâng cấp...).
             raise BadInput("mode day chưa hỗ trợ --scenario")
         self.tuning = tuning
         self.plans = {p["day"]: p for p in plans}
+        self._plan_count = len(plans)
         self.days = days
         # TODO(TV4, TICKET-02): dùng chung Streams/IdAllocator cho mọi pha hay tách theo ngày/pha.
         self.rng = streams
@@ -71,12 +74,16 @@ class DaySim:
     def _start_day(self, day, events):
         self.day = day
         self.active_upgrades = dict(self.upgrades)
-        plan = self.plans[day]
+        plan = self._plan(day)
         events.append(("day_start", {"day": day, "active_upgrades": dict(self.active_upgrades)}))
         events.append(("day_plan", {"day": day, "dishes": dict(plan["dishes"]),
                                     "ingredients": dict(plan["ingredients"])}))
         self.sub = GatherSim(self._gather_tuning(), {"day": day}, self.rng, self.ids)
         self._open_phase("gather", events)
+
+    def _plan(self, day):
+        """Kế hoạch của ngày `day`; quá D5 thì lặp lại D1..D5 (soak 10 ngày)."""
+        return self.plans[(day - 1) % self._plan_count + 1]
 
     def _open_phase(self, name, events):
         self.phase = name
@@ -85,7 +92,7 @@ class DaySim:
 
     def _open_quan(self, events):
         items = self.sub.inventory_items()  # ngất -> rỗng; Quán vẫn mở
-        plan = self.plans[self.day]
+        plan = self._plan(self.day)
         self.sub = QuanSim(self.tuning, {"reputation": self.rep}, self.rng, self.ids,
                            inventory=items, day_dishes=list(plan["dishes"]))
         self._open_phase("quan", events)

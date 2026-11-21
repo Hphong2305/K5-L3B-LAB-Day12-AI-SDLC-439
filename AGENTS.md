@@ -4,12 +4,16 @@
 
 ## Lệnh
 - Test: `PYTHONPATH=tests:. python3 -m unittest discover -s tests -v`
-- Headless: `python3 -m chonoi.headless --mode gather|quan --seed 1 --ticks 600 --out out.jsonl`
-- Chơi thử trên trình duyệt: `python3 -m chonoi.live --mode gather|quan` (mở địa chỉ in ra; WASD, E, Space, R)
+- Headless: `python3 -m chonoi.headless --mode gather|quan|day --seed 1 --ticks 600 --out out.jsonl` (`day`: thêm `--days 1..5`)
+- Chơi thử trên trình duyệt: `python3 -m chonoi.live --mode day --days 5` (hoặc `--mode gather|quan`; WASD, E, Space, R, P, 1/2, H)
+- Benchmark có render (v1.3): `python3 -m chonoi.bench --seed 42 --duration 30 --out bench.json` (cần màn hình)
+- Soak (v1.3): `python3 -m chonoi.soak --seed 7 --days 10 --out soak.json` (một tiến trình; `--mode day` vẫn giới hạn 1..5)
+- Trước khi đẩy client: `node --check` phần `<script>` của `chonoi/web/index.html` (hành động retro P2).
 
 ## Cấu trúc & quy ước
 - (Starter Python là TÙY CHỌN; nhóm có thể dùng ngôn ngữ khác nếu giữ Test Contract.) Khung do giảng viên cấp: `chonoi/{headless,inputs,scenario,contract,rng,ids,jsonl,inventory,runner,live}.py` và `chonoi/web/`. Hạn chế sửa; nếu phải sửa thì báo cả nhóm và ghi lại lý do.
-- Luật chơi của nhóm: `chonoi/sim/gather.py`, `chonoi/sim/quan.py` (tìm `TODO(nhóm)`).
+- Luật chơi của nhóm: `chonoi/sim/gather.py`, `chonoi/sim/quan.py`, `chonoi/sim/day.py` (vòng ngày/Shop); công cụ v1.3: `chonoi/bench.py`, `chonoi/soak.py`.
+- Kho v1.2: cá thể `{id, kind, fresh}`, `fresh` dạng `Fraction` bên trong — test so qua `format_item`/snapshot (ADR-0003).
 - **Số liệu chỉ đọc từ `game.contract.json` / dữ liệu**, không hard-code trong luật.
 - Mọi số ngẫu nhiên đi qua `Streams` (`chonoi/rng.py`); không dùng `random` toàn cục, không dùng đồng hồ hệ thống.
 - Sắp danh sách thực thể bằng `ids.sort_by_id`; cấp id bằng `IdAllocator`.
