@@ -17,10 +17,14 @@ class QuanSim:
     mode = "quan"
     phase = "quan"
 
-    def __init__(self, tuning, scenario, streams, ids, inventory=None):
+    def __init__(self, tuning, scenario, streams, ids, inventory=None, *, day_dishes=None):
         t = tuning["quan"]
         self.t = t
         self.menu = tuning["menu"]
+        self.orderable_dishes = sorted(self.menu if day_dishes is None else day_dishes)
+        unknown = set(self.orderable_dishes) - self.menu.keys()
+        if unknown:
+            raise BadInput(f"món ngoài menu trong day_plan: {sorted(unknown)}")
         self.rng = streams
         self.ids = ids
         self.tick = 0
@@ -361,9 +365,10 @@ class QuanSim:
         available = self.available_stock()
         reusable = {dish["dish_id"]: dish for dish in reversed(self.stored_dishes)
                     if not self._has_live_order(dish)}
-        dishes = [dish_id for dish_id, dish in sorted(self.menu.items())
+        dishes = [dish_id for dish_id in self.orderable_dishes
                   if dish_id in reusable
-                  or all(available.get(kind, 0) >= amount for kind, amount in dish["recipe"].items())]
+                  or all(available.get(kind, 0) >= amount
+                         for kind, amount in self.menu[dish_id]["recipe"].items())]
         if not dishes:
             events.append(("no_dish", {"table_id": table["id"]}))
             return
