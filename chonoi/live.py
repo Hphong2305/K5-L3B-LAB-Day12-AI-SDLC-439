@@ -49,6 +49,11 @@ class LiveGame:
 
     def _reset(self):
         self.session = Session(*self._args)
+        if self.mode == "quan":
+            path = os.path.join(os.path.dirname(__file__), "quan-live.json")
+            with open(path, encoding="utf-8") as config:
+                minutes = json.load(config)["leftover_lifetime_game_minutes"]
+            self.session.sim.leftover_lifetime_ticks = minutes * 60 * self.tuning["tick_hz"]
         self.inputs = LiveInputs()
         self.events = []
         self._saved = False

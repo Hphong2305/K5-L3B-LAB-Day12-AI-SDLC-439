@@ -17,3 +17,7 @@ python -m chonoi.headless --mode quan --seed 42 --inventory docs/contracts/inven
 TV4 có thể dùng `available_stock()` để đọc kho khả dụng. Hai lời gọi `_update_customer_patience(events)` và `_spawn_customer(events)` hiện được nối vào `step()` để chạy Lát 3 qua headless. TV4 sẽ dùng các điểm nối này khi ghép bếp và tương tác.
 
 Bản triển khai dùng `waiting` cho đơn mới, giảm kiên nhẫn ở `waiting` và `assigned`, và xử lý khách rời trước khi sinh khách mới. Cần đối chiếu tên trạng thái, payload sự kiện và thứ tự xử lý với bản đầy đủ mục F trước khi nghiệm thu.
+
+## Bảo quản món khi chơi trực tiếp
+
+Đã chạy lại lệnh unittest ở trên sau khi ghép bản TV4. **39 test qua**, gồm ba test mới kiểm tra thời hạn trong cấu hình live, trả và dùng lại món với kho rỗng, và tự hủy đúng tick hết hạn. Ca hết hạn đặt đồng hồ mô phỏng ngay trước mốc để kiểm tra chính xác hai tick liền kề. Một ca thường dài 180 giây game, nên ca mới qua lệnh chơi lại khởi tạo kho bảo quản mới. Chưa có cơ chế lưu món qua nhiều ca.
