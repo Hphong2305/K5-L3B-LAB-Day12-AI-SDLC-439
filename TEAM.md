@@ -7,7 +7,7 @@
 | TV1 (Lead) | phong | `sim/gather` | Team Lead, PO/Integrator | TV2 |
 | TV2 (Gather) | thangdktd | `sim/gather` | Developer Gather | TV1 |
 | TV3 (Quán) | daohiep2903 | `sim/quan` | Developer Quán | TV4 |
-| TV4 (Quán) | nguyentronglam | `sim/quan` | Developer Quán | TV3 |
+| TV4 (Quán) | NTLam108 | `sim/quan` | Developer Quán | TV3 |
 | TV5 (QA/HUD) | vuhieuvh | `qa` | QA Lead + HUD | TV1 |
 
 **Vai quy trình:** PO (đầu mối hỏi giảng viên, giữ `docs/clarify.md`) · Integrator (giữ `docs/contracts/`, gắn tag) · QA lead · Scrum/Release. Có thể kiêm.
