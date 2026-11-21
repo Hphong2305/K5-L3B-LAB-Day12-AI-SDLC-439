@@ -109,6 +109,47 @@ class GatherSim:
         self.done = False
         self.reason = None
 
+    def enable_live_creative(self):
+        """Sáng tạo của nhóm: chỉ bật khi chơi trực tiếp (--mode live --creative, ADR-0002).
+        Mở rộng tuần tra Cá Sấu, thêm M2/M3 và bầy cá kèo đắt tiền ở tầng nước sâu.
+        """
+        for m in self.monsters:
+            if m["id"] == "M1":
+                m["waypoints"] = [[45.0, 24.0], [70.0, 24.0]]
+        if not any(m["id"] == "M2" for m in self.monsters):
+            self.monsters.append({
+                "id": "M2",
+                "kind": "ca_sau",
+                "pos": [80.0, 18.0],
+                "waypoints": [[75.0, 18.0], [95.0, 18.0]],
+                "target_idx": 1,
+                "state": "patrol",
+                "state_ticks_left": 0,
+                "recoil_dir": None,
+            })
+            self.ids.reserve("M2")
+        if not any(m["id"] == "M3" for m in self.monsters):
+            self.monsters.append({
+                "id": "M3",
+                "kind": "ca_sau",
+                "pos": [25.0, 22.0],
+                "waypoints": [[15.0, 22.0], [40.0, 22.0]],
+                "target_idx": 1,
+                "state": "patrol",
+                "state_ticks_left": 0,
+                "recoil_dir": None,
+            })
+            self.ids.reserve("M3")
+        deep_fishes = [
+            {"id": "FK1", "kind": "ca_keo", "pos": [30.0, 25.0], "heading_deg": 0},
+            {"id": "FK2", "kind": "ca_keo", "pos": [55.0, 26.5], "heading_deg": 180},
+            {"id": "FK3", "kind": "ca_keo", "pos": [85.0, 24.0], "heading_deg": 0},
+        ]
+        for df in deep_fishes:
+            if not any(f["id"] == df["id"] for f in self.fish):
+                self.fish.append(df)
+                self.ids.reserve(df["id"])
+
     # --- giao diện cho runner -------------------------------------------------
     def inventory_items(self) -> dict:
         return hold_to_items(self.hold)
