@@ -141,9 +141,9 @@ class GatherSim:
             })
             self.ids.reserve("M3")
         deep_fishes = [
-            {"id": "FK1", "kind": "ca_keo", "pos": [30.0, 25.0], "heading_deg": 0},
-            {"id": "FK2", "kind": "ca_keo", "pos": [55.0, 26.5], "heading_deg": 180},
-            {"id": "FK3", "kind": "ca_keo", "pos": [85.0, 24.0], "heading_deg": 0},
+            {"id": "FK1", "kind": "ca_keo", "pos": [30.0, 25.0], "heading_deg": 0, "age_ticks": 0},
+            {"id": "FK2", "kind": "ca_keo", "pos": [55.0, 26.5], "heading_deg": 180, "age_ticks": 0},
+            {"id": "FK3", "kind": "ca_keo", "pos": [85.0, 24.0], "heading_deg": 0, "age_ticks": 0},
         ]
         for df in deep_fishes:
             if not any(f["id"] == df["id"] for f in self.fish):
@@ -467,6 +467,7 @@ class GatherSim:
         turn_rng = self.rng.get("fish_turn")
         x_bounds = self.t["fish_x"]
         for fish in sort_by_id(self.fish):
+            fish.setdefault("age_ticks", 0)
             fish["age_ticks"] += 1
             if fish["age_ticks"] % turn_ticks == 0:
                 fish["heading_deg"] = turn_rng.uniform(0.0, 360.0)
