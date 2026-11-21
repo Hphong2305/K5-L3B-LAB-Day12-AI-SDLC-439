@@ -17,6 +17,7 @@
  * Client chơi trực tiếp (starter). CHỈ ĐỌC snapshot từ GET /state và gửi phím qua POST /input.
  * Trường nào snapshot chưa có thì bỏ qua (nhóm viết luật tới đâu, hình hiện tới đó). Hình khối tạm, thay bằng đồ họa của nhóm.
  * Phím: WASD / mũi tên = di chuyển · E = interact · Space = catch · R = chơi lại.
+ * Mode day (TV4): P = tạm dừng · 1 = mua oxy · 2 = mua Máu · E ở Shop = rời Shop.
  */
 const cv = document.getElementById("c");
 const ctx = cv.getContext("2d");
@@ -24,15 +25,20 @@ let snap = null, offline = false;
 
 // ---------- vào: phím ----------
 const down = new Set();
+const DAY_KEYS = { p: "pause", "1": "buy_oxygen", "2": "buy_hp" };
 const MOVE_KEYS = { w: "u", arrowup: "u", s: "d", arrowdown: "d", a: "l", arrowleft: "l", d: "r", arrowright: "r" };
 let queue = [], inflight = false, lastSent = "";
 
+// mode day: màn vẽ theo pha đang chơi (gather / quan / shop / done)
+function viewMode() { return !snap ? "gather" : (snap.mode === "day" ? snap.day_phase : snap.mode); }
 function currentInput() {
-  const mode = snap ? snap.mode : "gather";
+  const mode = viewMode();
   const dx = (down.has("r") ? 1 : 0) - (down.has("l") ? 1 : 0);
   let dy = (down.has("d") ? 1 : 0) - (down.has("u") ? 1 : 0);   // gather: xuống = d dương
   if (mode === "quan") dy = -dy;                                // quan: lên (bắc) = z dương
-  return { move: [dx, dy], interact: down.has("interact"), catch: down.has("catch") };
+  const inp = { move: [dx, dy], interact: down.has("interact"), catch: down.has("catch") };
+  if (snap && snap.mode === "day") { inp.pause = down.has("pause"); inp.buy_oxygen = down.has("buy_oxygen"); inp.buy_hp = down.has("buy_hp"); }
+  return inp;
 }
 function pushInput() {
   const s = JSON.stringify(currentInput());
@@ -59,6 +65,7 @@ addEventListener("keydown", (e) => {
   else if (k === "e") down.add("interact");
   else if (k === " ") { down.add("catch"); e.preventDefault(); }
   else if (k === "r") { fetch("/restart", { method: "POST" }); lastSent = ""; down.clear(); }
+  else if (DAY_KEYS[k]) down.add(DAY_KEYS[k]);
   pushInput();
 });
 addEventListener("keyup", (e) => {
@@ -66,6 +73,7 @@ addEventListener("keyup", (e) => {
   if (MOVE_KEYS[k]) down.delete(MOVE_KEYS[k]);
   else if (k === "e") down.delete("interact");
   else if (k === " ") down.delete("catch");
+  else if (DAY_KEYS[k]) down.delete(DAY_KEYS[k]);
   pushInput();
 });
 addEventListener("blur", () => { down.clear(); pushInput(); });
@@ -84,7 +92,20 @@ poll();
 // ---------- vẽ ----------
 const KIND_COLOR = { ca_loc: "#7c9a52", ca_linh: "#d6e6f2", ca_keo: "#d9a066", bong_dien_dien: "#f2c230", bong_sung: "#e8799c", keo_neo: "#8fcf6b" };
 const KIND_NAME = { ca_loc: "cá lóc", ca_linh: "cá linh", ca_keo: "cá kèo", bong_dien_dien: "điên điển", bong_sung: "bông súng", keo_neo: "kèo nèo" };
-const kc = (k) => KIND_COLOR[k] || "#bbbbbb";
+const kindOf = (x) => (x && typeof x === "object" ? x.kind : x);   // v1.2: cá thể {id, kind, fresh}; v1.1: chuỗi
+const kc = (k) => KIND_COLOR[kindOf(k)] || "#bbbbbb";
+// tóm tắt kho/giỏ: "cá lóc×2 (tươi 80–99)"; nhận cả mảng cá thể v1.2 lẫn object đếm v1.1
+function summarizeItems(items) {
+  if (!items) return "";
+  if (!Array.isArray(items)) return Object.keys(items).map((k) => (KIND_NAME[k] || k) + "×" + items[k]).join(", ");
+  const g = {};
+  items.forEach((it) => { const k = kindOf(it), f = typeof it === "object" ? it.fresh : null;
+    const e = g[k] || (g[k] = { n: 0, lo: Infinity, hi: -Infinity }); e.n++;
+    if (f != null) { e.lo = Math.min(e.lo, f); e.hi = Math.max(e.hi, f); } });
+  return Object.keys(g).map((k) => { const e = g[k];
+    const fr = e.lo === Infinity ? "" : ` (tươi ${Math.floor(e.lo)}${e.hi !== e.lo ? "–" + Math.floor(e.hi) : ""})`;
+    return (KIND_NAME[k] || k) + "×" + e.n + fr; }).join(", ");
+}
 
 function fit() {
   const dpr = window.devicePixelRatio || 1;
@@ -122,7 +143,9 @@ function overlay(w, h) {
   if (snap.error) text("Luật của nhóm báo lỗi — xem terminal. R để chơi lại.", w / 2, 52, { align: "center", color: "#ff8a80", size: 15 });
   if (snap.finished) {
     ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(w / 2 - 190, h / 2 - 50, 380, 100);
-    text("Buổi " + (snap.mode === "gather" ? "sáng" : "tối") + " kết thúc: " + (snap.reason || ""), w / 2, h / 2 - 12, { align: "center", size: 20 });
+    const endMsg = snap.mode === "day" ? `Hết ${snap.days} ngày — tiền ${snap.money}k, uy tín ${(snap.reputation ?? 0).toFixed(1)}`
+      : "Buổi " + (snap.mode === "gather" ? "sáng" : "tối") + " kết thúc: " + (snap.reason || "");
+    text(endMsg, w / 2, h / 2 - 12, { align: "center", size: 20 });
     text("Nhấn R để chơi lại", w / 2, h / 2 + 20, { align: "center", color: "#cfd8dc" });
   }
 }
@@ -386,8 +409,7 @@ function drawGather(w, h) {
       ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.fillRect(x0, y0, sz, sz);
       if (snap.hold[i]) { ctx.fillStyle = kc(snap.hold[i]); ctx.fillRect(x0 + 3, y0 + 3, sz - 6, sz - 6); }
     }
-    const names = {}; snap.hold.forEach((k) => (names[k] = (names[k] || 0) + 1));
-    text("Giỏ " + snap.hold.length + "/" + cap + "  " + Object.keys(names).map((k) => (KIND_NAME[k] || k) + "×" + names[k]).join(", "), 14, y0 + sz + 16, { size: 12, color: "#cfd8dc" });
+    text("Giỏ " + snap.hold.length + "/" + cap + "  " + summarizeItems(snap.hold), 14, y0 + sz + 16, { size: 12, color: "#cfd8dc" });
   }
   text("WASD/mũi tên bơi · E hái / cập bến · Space bắt cá · R chơi lại", w - 10, h - 14, { size: 12, align: "right", color: "#9fb3c0" });
 }
@@ -439,9 +461,39 @@ function drawQuan(w, h) {
   // HUD
   text("⏱ " + fmtTime(snap.time_left_ticks), 14, 28, { size: 20 });
   text(`Tiền ${snap.money ?? 0}k · uy tín ${(snap.reputation ?? 0).toFixed(1)} · điểm ${snap.score ?? 0}`, 110, 28, { size: 16 });
-  const stock = snap.stock ? Object.keys(snap.stock).map((k) => (KIND_NAME[k] || k) + "×" + snap.stock[k]).join(", ") : "";
+  const stock = summarizeItems(snap.stock);
   text("Kho: " + (stock || "(trống)"), 14, 52, { size: 13, color: "#cfd8dc" });
   text("WASD/mũi tên đi · E tương tác (bếp / bàn) · R chơi lại", w - 10, h - 14, { size: 12, align: "right", color: "#9fb3c0" });
+}
+
+// ---------- mode day (TV4): băng tiêu đề ngày, màn Shop ----------
+const PHASE_NAME = { gather: "Buổi sáng — lặn hái", quan: "Buổi tối — mở quán", shop: "Shop", done: "Kết thúc" };
+function dayBanner(w, h) {
+  const up = snap.active_upgrades || {};
+  text(`Ngày ${snap.day}/${snap.days} · ${PHASE_NAME[snap.day_phase] || snap.day_phase} · nâng cấp: oxy ${up.oxygen || 0}, Máu ${up.hp || 0}`,
+       w / 2, 22, { align: "center", size: 15, color: "#ffe082" });
+  if (snap.paused) {
+    ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, 0, w, h);
+    text("TẠM DỪNG — nhấn P để chơi tiếp", w / 2, h / 2, { align: "center", size: 24 });
+  }
+}
+function drawShop(w, h) {
+  ctx.fillStyle = "#1b2630"; ctx.fillRect(0, 0, w, h);
+  text("SHOP cuối ngày " + snap.day, w / 2, 70, { align: "center", size: 26, color: "#ffe082" });
+  text(`Tiền: ${snap.money ?? 0}k`, w / 2, 104, { align: "center", size: 18 });
+  const shop = snap.shop || { offers: {} }, up = snap.upgrades || {};
+  const rows = [["1", "oxygen", "Bình oxy", "oxygen_max_s", "s oxy"], ["2", "hp", "Máu", "hp_max", " Máu"]];
+  rows.forEach(([key, kind, name, field, unit], i) => {
+    const y = 160 + i * 60, offer = (shop.offers || {})[kind];
+    const desc = offer ? `cấp ${offer.level}: ${offer[field]}${unit} — giá ${offer.price}k` : "đã tối đa";
+    const can = offer && (snap.money ?? 0) >= offer.price;
+    text(`[${key}] ${name} (đang cấp ${up[kind] || 0}) → ${desc}`, w / 2, y, { align: "center", size: 17, color: can ? "#a5d6a7" : "#9fb3c0" });
+  });
+  if (snap.day_phase === "shop") {
+    text(`Shop đóng sau ${fmtTime(snap.time_left_ticks)} · E rời Shop sang ngày sau`, w / 2, 300, { align: "center", size: 15, color: "#cfd8dc" });
+    text("Nâng cấp mua hôm nay có hiệu lực từ ngày mai", w / 2, 324, { align: "center", size: 13, color: "#9fb3c0" });
+  }
+  text("1 / 2 mua · E rời Shop · P tạm dừng · R chơi lại", w - 10, h - 14, { size: 12, align: "right", color: "#9fb3c0" });
 }
 
 function frame() {
@@ -449,7 +501,9 @@ function frame() {
   const [w, h] = fit();
   ctx.fillStyle = "#10161c"; ctx.fillRect(0, 0, w, h);
   if (snap) {
-    if (snap.mode === "quan") drawQuan(w, h); else drawGather(w, h);
+    const view = viewMode();
+    if (view === "quan") drawQuan(w, h); else if (view === "shop" || view === "done") drawShop(w, h); else drawGather(w, h);
+    if (snap.mode === "day") dayBanner(w, h);
     eventLog(w, h);
     overlay(w, h);
   } else {
