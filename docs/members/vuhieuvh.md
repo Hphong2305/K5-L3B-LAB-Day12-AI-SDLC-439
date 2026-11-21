@@ -27,3 +27,18 @@
   - AI khai báo trùng biến `const p` trong hàm vẽ canvas gây ra lỗi màn hình đen; tôi dùng `node -c` và DevTools để bắt lỗi cú pháp và sửa ngay.
 - **Điều tôi học được:**
   - Đảm bảo tách biệt rõ ràng giữa logic mô phỏng contract và tầng trình diễn giao diện Web giúp game vừa sinh động vừa đảm bảo tuyệt đối tính tất định headless.
+
+## Phase 3
+- **Tôi đã làm (kèm link commit):**
+  - Lập ma trận kiểm thử Phase 3 gồm 10 tiêu chí AC-P3-01 đến AC-P3-10 ([docs/verification/phase-3.md](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/verification/phase-3.md)).
+  - Nâng cấp HUD Web Canvas ([chonoi/web/index.html](file:///e:/ai_thuc_chien/day_12_thuc_hanh/chonoi/web/index.html)): Hiển thị thanh độ tươi đổi màu (xanh/vàng/đỏ) và biểu tượng cảnh báo hàng ươn ⚠️ cho cá và khoang giỏ/kho.
+  - Viết bộ test độc lập `tests/test_phase3_qa.py`; phát hiện và báo lỗi 2 ca test hồi quy cho TV3, TV4; chạy nghiệm thu toàn bộ 103/103 tests PASS ([p3_full_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-3/p3_full_test.log)) và tính tất định `--mode day --days 2` ([day_smoke.jsonl](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-3/day_smoke.jsonl)).
+- **Tôi đã review (kèm link):**
+  - Review commit `d9fd71a` của TV1 (Contract v1.2, kho cá thể, độ tươi và dòng lũ `current`).
+  - Review commit `5252728` của TV2 (Bảo toàn ID cá thể khi hái/bắt và handoff).
+  - Review commit `41cfd1a` / `b5f925c` của TV3 (Kho cá thể Quán, reserve theo ID, re-reserve khi ươn).
+  - Review commit `5021ada` của TV4 (Định giá món ăn và tip theo độ tươi, sửa test mode day v1.2).
+- **AI sai ở đâu và tôi phát hiện thế nào:**
+  - Khi merge nhánh TV4 vào TV5 có xung đột cú pháp ở hàm tóm tắt kho; tôi dùng `node -c` kiểm tra cú pháp JS để hợp nhất mượt mà cả độ tươi lẫn cảnh báo hàng ươn.
+- **Điều tôi học được:**
+  - Khi schema kho chuyển từ đếm số lượng sang danh sách cá thể có ID, việc phát hiện lỗi hồi quy sớm ở các test phụ thuộc là chìa khóa giúp cả đội không bị tắc nghẽn.
