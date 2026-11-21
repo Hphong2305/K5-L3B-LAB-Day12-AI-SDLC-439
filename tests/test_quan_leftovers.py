@@ -35,13 +35,13 @@ class QuanLeftovers(unittest.TestCase):
         sim._spawn_customer([])
         customer, = sim.customers
         self.assertEqual(customer["dish_id"], "ca_loc_nuong_trui")
-        self.assertEqual(customer["reserved"], {})
+        self.assertEqual(customer["reserved"], [])  # v1.2: reserved là mảng ID cá thể
         sim._stove_interact(stove, [])
         self.assertEqual(sim.hand["order_id"], customer["order_id"])
         self.assertEqual(sim.hand["expires_at_tick"], original_deadline)
         sim._table_interact(sim.tables[0], [])
         self.assertEqual(customer["state"], "eating")
-        self.assertEqual(sim.stock, {})
+        self.assertEqual(sim.stock, [])  # v1.2: kho là mảng cá thể
 
     def test_unclaimed_dish_expires_at_original_deadline(self):
         sim = LiveGame("quan", self.tuning, {"random_customers": False}, 42).session.sim
