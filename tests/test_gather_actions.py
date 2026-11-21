@@ -15,6 +15,10 @@ def pressed(button):
     return InputState((0.0, 0.0), {button: True}, {button})
 
 
+def item(ident, kind, fresh=100):
+    return {"id": ident, "kind": kind, "fresh": fresh}
+
+
 class GatherActions(unittest.TestCase):
     def test_gather_at_surface_inclusive_radius_and_id_tie_break(self):
         sim = build_sim(
@@ -29,7 +33,7 @@ class GatherActions(unittest.TestCase):
 
         self.assertEqual(events[0][0], "gather")
         self.assertEqual(events[0][1]["node_id"], "N2")
-        self.assertEqual(sim.hold, ["bong_dien_dien"])
+        self.assertEqual(sim.hold, [item("I1", "bong_dien_dien")])
         self.assertEqual(sim.nodes[1]["regrow_ticks"], 20 * 60)
 
     def test_gather_requires_surface_and_available_node(self):
@@ -51,7 +55,7 @@ class GatherActions(unittest.TestCase):
             tuning,
             {
                 "player": {"pos": [20, 0]},
-                "hold": ["ca_loc"],
+                "hold": [item("I1", "ca_loc")],
                 "nodes": [{"id": "N1", "kind": "bong_sung", "pos": [20, 0]}],
             },
             Streams(1),
@@ -61,7 +65,10 @@ class GatherActions(unittest.TestCase):
         events = sim.step(pressed("interact"))
 
         self.assertEqual(events, [("hold_full", {"source": "node", "source_id": "N1"})])
-        self.assertEqual(sim.hold, ["ca_loc"])
+        self.assertEqual(
+            sim.hold,
+            [item("I1", "ca_loc", sim.initial_fresh - sim.decay_per_tick)],
+        )
         self.assertEqual(sim.nodes[0]["regrow_ticks"], 0)
 
     def test_catch_at_inclusive_radius_yields_and_applies_cooldown(self):
@@ -78,7 +85,7 @@ class GatherActions(unittest.TestCase):
         self.assertEqual(events[0][0], "fish_caught")
         self.assertEqual(events[0][1]["fish_id"], "F1")
         self.assertEqual(events[0][1]["yield"], 3)
-        self.assertEqual(sim.hold, ["ca_linh"] * 3)
+        self.assertEqual(sim.hold, [item(f"I{i}", "ca_linh") for i in range(1, 4)])
         self.assertEqual(sim.catch_cd_ticks, 30)
         self.assertEqual([fish["id"] for fish in sim.fish], ["F2"])
 
@@ -102,7 +109,7 @@ class GatherActions(unittest.TestCase):
             tuning,
             {
                 "player": {"pos": [20, 10]},
-                "hold": ["bong_sung"],
+                "hold": [item("I1", "bong_sung")],
                 "fish": [{"id": "F1", "kind": "ca_linh", "pos": [20, 10]}],
             },
             Streams(1),
@@ -110,7 +117,10 @@ class GatherActions(unittest.TestCase):
         )
         events = sim.step(pressed("catch"))
         self.assertEqual(events, [("hold_full", {"source": "fish", "source_id": "F1"})])
-        self.assertEqual(sim.hold, ["bong_sung"])
+        self.assertEqual(
+            sim.hold,
+            [item("I1", "bong_sung", sim.initial_fresh - sim.decay_per_tick)],
+        )
         self.assertEqual(sim.catch_cd_ticks, 0)
 
     def test_dock_interaction_precedes_gather_and_faint_discards_hold(self):
@@ -123,10 +133,10 @@ class GatherActions(unittest.TestCase):
         self.assertEqual(events[0][1]["reason"], "docked")
         self.assertEqual(sim.hold, [])
 
-        sim = build_sim(hold=["ca_loc", "bong_sung"])
+        sim = build_sim(hold=[item("I1", "ca_loc"), item("I2", "bong_sung")])
         events = []
         sim._finish("fainted", events)
-        self.assertEqual(events[0][1]["inventory"], {"items": {}})
+        self.assertEqual(events[0][1]["inventory"], {"items": []})
         self.assertEqual(sim.hold, [])
 
 
