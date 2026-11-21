@@ -3,3 +3,8 @@ __pycache__/
 *.jsonl
 !tests/fixtures/*.jsonl
 .DS_Store
+
+# đầu ra cục bộ của bench/soak, gói phát hành
+bench.json
+soak.json
+dist/

@@ -1,0 +1,206 @@
+# commit 55cc8b5 — 2026-11-21T07:26:13Z — Windows 11, Python 3.12.6
+test_buy_without_money_or_past_max_level_fails (test_day_mode.DayMode.test_buy_without_money_or_past_max_level_fails) ... ok
+test_cli_bad_days_and_flags_exit_2 (test_day_mode.DayMode.test_cli_bad_days_and_flags_exit_2) ... ok
+test_cli_deterministic_bytes_two_days (test_day_mode.DayMode.test_cli_deterministic_bytes_two_days) ... ok
+test_cli_one_day_lifecycle_and_same_tick_transitions (test_day_mode.DayMode.test_cli_one_day_lifecycle_and_same_tick_transitions) ... ok
+test_faint_hands_empty_v12_inventory_and_quan_still_opens (test_day_mode.DayMode.test_faint_hands_empty_v12_inventory_and_quan_still_opens) ... ok
+test_gather_hold_becomes_quan_stock_with_day_menu (test_day_mode.DayMode.test_gather_hold_becomes_quan_stock_with_day_menu) ... ok
+test_gather_hold_handed_to_quan_as_v12_items_with_day_menu (test_day_mode.DayMode.test_gather_hold_handed_to_quan_as_v12_items_with_day_menu)
+v1.2 (ADR-0003): Quán nhận đúng mảng cá thể {id, kind, fresh} như gather_end.inventory.items. ... ok
+test_item_ids_keep_increasing_across_days (test_day_mode.DayMode.test_item_ids_keep_increasing_across_days) ... ok
+test_money_and_reputation_carry_over_quan_starts_from_day_reputation (test_day_mode.DayMode.test_money_and_reputation_carry_over_quan_starts_from_day_reputation) ... ok
+test_one_day_headless_under_20s (test_day_mode.DayMode.test_one_day_headless_under_20s) ... ok
+test_pause_freezes_sim_and_timers_resume_runs_same_step (test_day_mode.DayMode.test_pause_freezes_sim_and_timers_resume_runs_same_step) ... ok
+test_shop_closes_after_max_ticks (test_day_mode.DayMode.test_shop_closes_after_max_ticks) ... ok
+test_upgrade_takes_effect_next_day_only (test_day_mode.DayMode.test_upgrade_takes_effect_next_day_only) ... ok
+test_catch_at_inclusive_radius_yields_and_applies_cooldown (test_gather_actions.GatherActions.test_catch_at_inclusive_radius_yields_and_applies_cooldown) ... ok
+test_catch_requires_underwater_and_enough_capacity (test_gather_actions.GatherActions.test_catch_requires_underwater_and_enough_capacity) ... ok
+test_dock_interaction_precedes_gather_and_faint_discards_hold (test_gather_actions.GatherActions.test_dock_interaction_precedes_gather_and_faint_discards_hold) ... ok
+test_gather_at_surface_inclusive_radius_and_id_tie_break (test_gather_actions.GatherActions.test_gather_at_surface_inclusive_radius_and_id_tie_break) ... ok
+test_gather_does_not_take_partial_yield_when_full (test_gather_actions.GatherActions.test_gather_does_not_take_partial_yield_when_full) ... ok
+test_gather_requires_surface_and_available_node (test_gather_actions.GatherActions.test_gather_requires_surface_and_available_node) ... ok
+test_catch_uses_pre_movement_position_and_removes_school (test_gather_fish.GatherFish.test_catch_uses_pre_movement_position_and_removes_school) ... ok
+test_initial_schools_use_eight_distinct_species_valid_points (test_gather_fish.GatherFish.test_initial_schools_use_eight_distinct_species_valid_points) ... ok
+test_jsonl_spawn_event_and_same_seed_are_byte_deterministic (test_gather_fish.GatherFish.test_jsonl_spawn_event_and_same_seed_are_byte_deterministic) ... ok
+test_new_species_yield_and_new_node_kind (test_gather_fish.GatherFish.test_new_species_yield_and_new_node_kind) ... ok
+test_reflection_preserves_remaining_distance_at_edges_and_corner (test_gather_fish.GatherFish.test_reflection_preserves_remaining_distance_at_edges_and_corner) ... ok
+test_scenario_age_ticks_and_species_bands_are_validated (test_gather_fish.GatherFish.test_scenario_age_ticks_and_species_bands_are_validated) ... ok
+test_school_moves_at_configured_speed_and_turns_on_120th_swim_step (test_gather_fish.GatherFish.test_school_moves_at_configured_speed_and_turns_on_120th_swim_step) ... ok
+test_spawn_respects_capacity_and_random_fish_false_freezes_fixtures (test_gather_fish.GatherFish.test_spawn_respects_capacity_and_random_fish_false_freezes_fixtures) ... ok
+test_spawns_at_360_after_swimming_and_new_school_moves_next_tick (test_gather_fish.GatherFish.test_spawns_at_360_after_swimming_and_new_school_moves_next_tick) ... ok
+test_choke_decreases_hp (test_gather_lat1.TestGatherLat1.test_choke_decreases_hp)
+Oxy = 0 dưới nước: đếm 60 tick ngạt thì trừ 1 HP, phát choke. ... ok
+test_dive_and_surface_events (test_gather_lat1.TestGatherLat1.test_dive_and_surface_events)
+Bơi từ mặt nước xuống phát dive; bơi từ dưới nước lên phát surface. ... ok
+test_faint_empties_hold_and_writes_empty_inventory (test_gather_lat1.TestGatherLat1.test_faint_empties_hold_and_writes_empty_inventory)
+Máu về 0: ngất (faint), gather_end(fainted), giỏ bị xoá sạch, xuất kho rỗng. ... ok
+test_oxygen_consumption_and_empty_event (test_gather_lat1.TestGatherLat1.test_oxygen_consumption_and_empty_event)
+Dưới nước: trừ 1 oxy/tick, chạm 0 phát oxygen_empty. ... ok
+test_oxygen_refill_at_surface (test_gather_lat1.TestGatherLat1.test_oxygen_refill_at_surface)
+Ở mặt nước: hồi oxygen_refill_per_tick (6 tick/tick), kẹp tối đa. ... ok
+test_detect_chase_and_exit_radius (test_gather_monsters.TestGatherMonsters.test_detect_chase_and_exit_radius)
+Người chơi ở d >= 10 và cách <= 10m -> Cá sấu rượt theo ở 3.0 m/s; thoát khi > 16m hoặc d < 10. ... ok
+test_faint_from_monster_hit (test_gather_monsters.TestGatherMonsters.test_faint_from_monster_hit)
+Khi bị hit và HP chạm 0 -> ngất với cause='monster', mất sạch giỏ, kho rỗng. ... ok
+test_hit_reduces_hp_drops_half_lifo_and_sets_invuln (test_gather_monsters.TestGatherMonsters.test_hit_reduces_hp_drops_half_lifo_and_sets_invuln)
+Khoảng cách <= 1.5m ở d >= 10: mất 1 HP, rơi floor(hold/2) LIFO, bất tử 90 tick, quái vào recoil 60 tick. ... ok
+test_monster_spawns_by_day (test_gather_monsters.TestGatherMonsters.test_monster_spawns_by_day)
+Ngày 1 chỉ có M1; Ngày 3 có cả M1 và M2. ... ok
+test_patrol_movement_between_waypoints (test_gather_monsters.TestGatherMonsters.test_patrol_movement_between_waypoints)
+M1 tuần tra 1.0 m/s giữa [60, 24] và [64, 24]. ... ok
+test_current_ends_with_phase_end_before_faint_and_gather_end (test_gather_phase3_tv1.TestPhase3TV1.test_current_ends_with_phase_end_before_faint_and_gather_end)
+Nếu ca kết thúc khi dòng lũ đang chạy, phát current_end(phase_end) trước faint và gather_end. ... ok
+test_current_warning_start_push_and_elapsed_end (test_gather_phase3_tv1.TestPhase3TV1.test_current_warning_start_push_and_elapsed_end)
+Dòng nước lũ: warning ở 1680, start ở 1800, đẩy 1.5 m/s ở d >= 10, end(elapsed) ở 2280. ... ok
+test_new_item_starts_at_100_and_decays_next_tick (test_gather_phase3_tv1.TestPhase3TV1.test_new_item_starts_at_100_and_decays_next_tick)
+Hàng mới hái/bắt có fresh = 100 ở bước lấy, bắt đầu hao từ bước sau. ... ok
+test_spoiled_threshold_at_30_emits_once_in_id_order (test_gather_phase3_tv1.TestPhase3TV1.test_spoiled_threshold_at_30_emits_once_in_id_order)
+Mẫu chuẩn TICKET-03: cá thể bắt đầu đúng fresh 30 nên ươn ở bước đầu (tick 1). ... ok
+test_v12_rejects_count_inventory_and_invalid_items (test_gather_phase3_tv1.TestPhase3TV1.test_v12_rejects_count_inventory_and_invalid_items)
+Contract v1.2 trả mã 2 cho file kho đếm hoặc sai schema, kind lạ, id trùng, fresh ngoài miền. ... ok
+test_lifo_loss_preserves_item_objects_and_ids_are_not_reused (test_gather_phase3_tv2.GatherFreshnessTV2.test_lifo_loss_preserves_item_objects_and_ids_are_not_reused) ... ok
+test_spoiled_item_still_occupies_capacity (test_gather_phase3_tv2.GatherFreshnessTV2.test_spoiled_item_still_occupies_capacity) ... ok
+test_state_input_and_clean_stop (test_live.LiveServerTest.test_state_input_and_clean_stop) ... ok
+test_ac_p3_01_v11_inventory_rejected_when_v12_active (test_phase3_qa.TestPhase3QA.test_ac_p3_01_v11_inventory_rejected_when_v12_active)
+AC-P3-01: File kho v1.1 cũ (chỉ count) phải bị từ chối với exit code 2 khi contract lên v1.2. ... ok
+test_ac_p3_02_spoiled_fish_at_tick_1 (test_phase3_qa.TestPhase3QA.test_ac_p3_02_spoiled_fish_at_tick_1)
+AC-P3-02: Kiểm tra hàng ươn tại tick 1 khi fresh=30 (hoặc chạm ngưỡng ươn). ... ok
+test_ac_p3_06_id_allocator_monotonicity (test_phase3_qa.TestPhase3QA.test_ac_p3_06_id_allocator_monotonicity)
+AC-P3-06: Bộ cấp phát ID phải tăng đơn điệu xuyên suốt các ngày trong mode day. ... ok
+test_hud_html_contains_freshness_and_spoiled_indicators (test_phase3_qa.TestPhase3QA.test_hud_html_contains_freshness_and_spoiled_indicators)
+AC-P3-09: Kiểm tra HUD HTML đã có hàm xử lý độ tươi và cảnh báo hàng ươn. ... ok
+test_p1_low_empty (test_phase4.BenchFormula.test_p1_low_empty) ... ok
+test_p1_low_uses_ceil_1_percent_slowest_frames (test_phase4.BenchFormula.test_p1_low_uses_ceil_1_percent_slowest_frames) ... ok
+test_high_contrast_toggle (test_phase4.ClientWarnings.test_high_contrast_toggle) ... ok
+test_three_warnings_have_text_and_icon (test_phase4.ClientWarnings.test_three_warnings_have_text_and_icon) ... ok
+test_gameplay_tuning_unchanged_from_v12 (test_phase4.Manifest.test_gameplay_tuning_unchanged_from_v12) ... ok
+test_v13_declares_bench_and_soak (test_phase4.Manifest.test_v13_declares_bench_and_soak) ... ok
+test_bad_frames_raise (test_python_starter_units.Units.test_bad_frames_raise) ... ok
+test_catch_is_a_v10_button_and_attack_is_not (test_python_starter_units.Units.test_catch_is_a_v10_button_and_attack_is_not) ... ok
+test_id_allocator_continues_after_max (test_python_starter_units.Units.test_id_allocator_continues_after_max) ... ok
+test_id_sorting (test_python_starter_units.Units.test_id_sorting) ... ok
+test_input_edges_and_inherit (test_python_starter_units.Units.test_input_edges_and_inherit) ... ok
+test_live_inputs_keep_fast_tap_edge (test_python_starter_units.Units.test_live_inputs_keep_fast_tap_edge) ... ok
+test_session_steps_gather_and_dock (test_python_starter_units.Units.test_session_steps_gather_and_dock) ... ok
+test_arrival_reserves_recipe_without_consuming_stock (test_quan_customers.QuanCustomers.test_arrival_reserves_recipe_without_consuming_stock) ... ok
+test_fixture_leaves_at_deadline_and_releases_stock (test_quan_customers.QuanCustomers.test_fixture_leaves_at_deadline_and_releases_stock) ... ok
+test_fixture_reservation_cannot_exceed_stock (test_quan_customers.QuanCustomers.test_fixture_reservation_cannot_exceed_stock) ... ok
+test_insufficient_stock_produces_no_dish (test_quan_customers.QuanCustomers.test_insufficient_stock_produces_no_dish) ... ok
+test_invalid_items_and_duplicate_reservations (test_quan_customers.QuanCustomers.test_invalid_items_and_duplicate_reservations) ... ok
+test_one_retry_per_order_and_spoiled_items_cannot_be_cooked (test_quan_customers.QuanCustomers.test_one_retry_per_order_and_spoiled_items_cannot_be_cooked) ... ok
+test_retry_with_insufficient_stock_marks_order_unfulfillable (test_quan_customers.QuanCustomers.test_retry_with_insufficient_stock_marks_order_unfulfillable) ... ok
+test_spoilage_releases_whole_reservation_and_uses_freshest_replacements (test_quan_customers.QuanCustomers.test_spoilage_releases_whole_reservation_and_uses_freshest_replacements) ... ok
+test_day_menu_filters_before_reserving_ingredients (test_quan_day_menu.QuanDayMenu.test_day_menu_filters_before_reserving_ingredients) ... ok
+test_standalone_can_order_dish_excluded_by_day (test_quan_day_menu.QuanDayMenu.test_standalone_can_order_dish_excluded_by_day) ... ok
+test_live_only_and_thirty_game_minutes (test_quan_leftovers.QuanLeftovers.test_live_only_and_thirty_game_minutes) ... ok
+test_return_and_reuse_without_consuming_stock_again (test_quan_leftovers.QuanLeftovers.test_return_and_reuse_without_consuming_stock_again) ... ok
+test_unclaimed_dish_expires_at_original_deadline (test_quan_leftovers.QuanLeftovers.test_unclaimed_dish_expires_at_original_deadline) ... ok
+test_base_price_floor_of_avg_fresh_and_tip_on_base_price (test_quan_price.QuanPrice.test_base_price_floor_of_avg_fresh_and_tip_on_base_price) ... ok
+test_floor_is_exact_on_freshness_grid (test_quan_price.QuanPrice.test_floor_is_exact_on_freshness_grid) ... ok
+test_fresh_items_keep_listed_price (test_quan_price.QuanPrice.test_fresh_items_keep_listed_price) ... ok
+test_headless_cook_started_items_use_fresh_at_consume_time (test_quan_price.QuanPrice.test_headless_cook_started_items_use_fresh_at_consume_time)
+Hộp đen: kho hao 1 tick ở Quán trước lượt bấm bếp, items mang độ tươi lúc tiêu. ... ok
+test_items_sorted_by_kind_then_id_and_average_over_all_items (test_quan_price.QuanPrice.test_items_sorted_by_kind_then_id_and_average_over_all_items) ... ok
+test_no_tip_when_patience_low_even_with_base_price (test_quan_price.QuanPrice.test_no_tip_when_patience_low_even_with_base_price) ... ok
+test_paid_uses_base_price (test_quan_price.QuanPrice.test_paid_uses_base_price) ... ok
+test_con_01_ticks_zero_and_end_line (test_smoke_p1.Contract.test_con_01_ticks_zero_and_end_line) ... ok
+test_con_02_deterministic_bytes (test_smoke_p1.Contract.test_con_02_deterministic_bytes) ... ok
+test_con_03_bad_input_exit_2 (test_smoke_p1.Contract.test_con_03_bad_input_exit_2) ... Exception in thread Thread-87 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d in position 35: character maps to <undefined>
+Exception in thread Thread-89 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d in position 35: character maps to <undefined>
+ok
+test_con_03_old_and_future_modes_rejected (test_smoke_p1.Contract.test_con_03_old_and_future_modes_rejected) ... ok
+test_gather_snapshot_has_gather_fields (test_smoke_p1.Contract.test_gather_snapshot_has_gather_fields) ... ok
+test_scenario_out_of_domain_exit_2 (test_smoke_p1.Contract.test_scenario_out_of_domain_exit_2) ... Exception in thread Thread-107 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d in position 23: character maps to <undefined>
+ok
+test_fish_catch_is_emitted_in_jsonl (test_smoke_p1.Integration.test_fish_catch_is_emitted_in_jsonl) ... ok
+test_gather_actions_are_emitted_and_inventory_v12_is_written (test_smoke_p1.Integration.test_gather_actions_are_emitted_and_inventory_v12_is_written) ... ok
+test_inv_01_gather_writes_inventory_quan_reads_it (test_smoke_p1.Integration.test_inv_01_gather_writes_inventory_quan_reads_it)
+Ví dụ smoke test trong PRD-0 mục G: cập bến ở tick 0, quán đọc kho đúng nội dung. ... ok
+test_inv_01_not_written_when_tick_limit_first (test_smoke_p1.Integration.test_inv_01_not_written_when_tick_limit_first) ... ok
+test_inv_bad_schema_exit_2 (test_smoke_p1.Integration.test_inv_bad_schema_exit_2) ... ok
+test_inventory_and_scenario_stock_conflict (test_smoke_p1.Integration.test_inventory_and_scenario_stock_conflict) ... ok
+test_inventory_flags_mode_mismatch_exit_2 (test_smoke_p1.Integration.test_inventory_flags_mode_mismatch_exit_2) ... ok
+test_move_01_swim_speed_after_ramp (test_smoke_p1.Movement.test_move_01_swim_speed_after_ramp)
+Bỏ 6 tick tăng tốc rồi đo 60 tick: quãng ≈ swim_speed × 1 s (±0.1). Ngang, xuống, chéo (không nhanh hơn). ... ok
+test_move_02_heading_positive_is_down (test_smoke_p1.Movement.test_move_02_heading_positive_is_down) ... ok
+test_move_03_edge_clamp (test_smoke_p1.Movement.test_move_03_edge_clamp)
+Chặn từng mép của vùng nước, kể cả d không âm (không bay lên khỏi mặt nước) và đáy d = 30. ... ok
+test_move_mep_vel_ve_0 (test_smoke_p1.Movement.test_move_mep_vel_ve_0) ... ok
+test_move_ramp_doi_huong_trong_tran (test_smoke_p1.Movement.test_move_ramp_doi_huong_trong_tran)
+Đảo từ +speed sang -speed: vận tốc chạm mục tiêu sau tối đa ramp_max_ticks tick kể từ lúc đổi input. ... ok
+test_time_ends_gather_and_keeps_hold (test_smoke_p1.Movement.test_time_ends_gather_and_keeps_hold) ... ok
+test_khoi_sai_mode_exit_2 (test_smoke_p1.ScenarioModes.test_khoi_sai_mode_exit_2) ... ok
+test_quan_fixture_khong_hop_le_exit_2 (test_smoke_p1.ScenarioModes.test_quan_fixture_khong_hop_le_exit_2) ... ok
+test_quan_player_vel_hop_le (test_smoke_p1.ScenarioModes.test_quan_player_vel_hop_le) ... ok
+test_1_5_10_days_complete_without_crash (test_soak.Soak.test_1_5_10_days_complete_without_crash) ... E:\ai20k_lab\K5-L3B-LAB-Day12-AI-SDLC-439\tests\test_soak.py:30: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\ASUS\\AppData\\Local\\Temp\\tmpahdjmrx5\\soak.json' mode='r' encoding='utf-8'>
+  data = json.load(open(out, encoding="utf-8")) if os.path.exists(out) else None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\ai20k_lab\K5-L3B-LAB-Day12-AI-SDLC-439\tests\test_soak.py:30: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\ASUS\\AppData\\Local\\Temp\\tmp9_ar9q4z\\soak.json' mode='r' encoding='utf-8'>
+  data = json.load(open(out, encoding="utf-8")) if os.path.exists(out) else None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\ai20k_lab\K5-L3B-LAB-Day12-AI-SDLC-439\tests\test_soak.py:30: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\ASUS\\AppData\\Local\\Temp\\tmpb0urzy3v\\soak.json' mode='r' encoding='utf-8'>
+  data = json.load(open(out, encoding="utf-8")) if os.path.exists(out) else None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_bad_args_exit_2_without_output (test_soak.Soak.test_bad_args_exit_2_without_output) ... đầu vào sai: --days phải trong [1, 100]
+đầu vào sai: --days phải trong [1, 100]
+usage: chonoi.soak [-h] --seed SEED --days DAYS --out OUT
+chonoi.soak: error: argument --seed: invalid int value: 'x'
+usage: chonoi.soak [-h] --seed SEED --days DAYS --out OUT
+chonoi.soak: error: the following arguments are required: --seed
+ok
+test_mode_day_still_limited_to_5_days (test_soak.Soak.test_mode_day_still_limited_to_5_days) ... ok
+test_plans_cycle_after_day_5_and_state_carries (test_soak.Soak.test_plans_cycle_after_day_5_and_state_carries) ... ok
+test_runs_in_one_process_via_manifest_soak_cmd (test_soak.Soak.test_runs_in_one_process_via_manifest_soak_cmd) ... E:\ai20k_lab\K5-L3B-LAB-Day12-AI-SDLC-439\tests\test_soak.py:56: ResourceWarning: unclosed file <_io.TextIOWrapper name='E:\\ai20k_lab\\K5-L3B-LAB-Day12-AI-SDLC-439\\tests\\..\\game.contract.json' mode='r' encoding='utf-8'>
+  contract = json.load(open(os.path.join(os.path.dirname(__file__), "..", "game.contract.json"), encoding="utf-8"))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\ai20k_lab\K5-L3B-LAB-Day12-AI-SDLC-439\tests\test_soak.py:64: ResourceWarning: unclosed file <_io.TextIOWrapper name='C:\\Users\\ASUS\\AppData\\Local\\Temp\\tmppq9_nawo\\s.json' mode='r' encoding='utf-8'>
+  self.assertEqual(json.load(open(out, encoding="utf-8"))["days_completed"], 10)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_same_seed_same_gameplay_data (test_soak.Soak.test_same_seed_same_gameplay_data) ... ok
+test_good (test_team_check.TeamCheck.test_good) ... ok
+test_template_is_rejected (test_team_check.TeamCheck.test_template_is_rejected) ... ok
+test_too_few_members (test_team_check.TeamCheck.test_too_few_members) ... ok
+test_wrong_size_duplicate_and_outsider (test_team_check.TeamCheck.test_wrong_size_duplicate_and_outsider) ... ok
+
+----------------------------------------------------------------------
+Ran 115 tests in 40.545s
+
+OK

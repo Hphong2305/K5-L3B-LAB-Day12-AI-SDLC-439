@@ -3,11 +3,14 @@
 import os
 import time
 import unittest
+from unittest import mock
+from fractions import Fraction
 
 from helpers import read_jsonl, run_headless, write_json
 
 from chonoi.contract import load_contract
 from chonoi.ids import IdAllocator
+from chonoi.inventory import format_item, fresh_to_num
 from chonoi.inputs import InputState
 from chonoi.rng import Streams
 from chonoi.sim.day import DaySim
@@ -110,12 +113,62 @@ class DayMode(unittest.TestCase):
         ]
         sim.step(press("interact"))  # đứng ở bến -> docked
         self.assertEqual(sim.phase, "quan")
-        self.assertEqual(sim.sub.stock, [
+        # Quán giữ fresh dạng Fraction bên trong (TV3); so ở dạng xuất ra (snapshot / file kho), làm tròn 3 chữ số.
+        self.assertEqual([format_item(it) for it in sim.sub.stock], [
             {"id": "I1", "kind": "ca_loc", "fresh": 99.992},
             {"id": "I2", "kind": "bong_sung", "fresh": 99.992},
             {"id": "I3", "kind": "bong_sung", "fresh": 99.992},
         ])
         self.assertEqual(sim.sub.orderable_dishes, sorted(self.t["day_plan"][0]["dishes"]))
+
+    def _item(self, sim, kind, fresh=100):
+        return {"id": sim.ids.new("I"), "kind": kind, "fresh": Fraction(fresh)}
+
+    def test_gather_hold_handed_to_quan_as_v12_items_with_day_menu(self):
+        """v1.2 (ADR-0003): Quán nhận đúng mảng cá thể {id, kind, fresh} như gather_end.inventory.items.
+
+        QuanSim được thay bằng bản ghi lại tham số: phần đọc kho cá thể ở Quán là của TV3 (chưa xong),
+        test này chỉ kiểm phần bàn giao của Day.
+        """
+        sim = self.sim()
+        sim.sub.hold = [self._item(sim, "ca_loc"), self._item(sim, "bong_sung"), self._item(sim, "bong_sung")]
+        with mock.patch("chonoi.sim.day.QuanSim") as quan:
+            evs = sim.step(press("interact"))  # đứng ở bến -> docked
+        self.assertEqual(sim.phase, "quan")
+        end = dict(evs)["gather_end"]
+        # bước cập bến vẫn hao tươi 1 tick ở giỏ: 100 - gather_decay_per_s / tick_hz
+        fr = self.t["freshness"]
+        f1 = fresh_to_num(Fraction(100) - Fraction(str(fr["gather_decay_per_s"])) / self.t["tick_hz"])
+        expected = [{"id": "I1", "kind": "ca_loc", "fresh": f1}, {"id": "I2", "kind": "bong_sung", "fresh": f1},
+                    {"id": "I3", "kind": "bong_sung", "fresh": f1}]
+        self.assertEqual(end["inventory"], {"items": expected})
+        kwargs = quan.call_args.kwargs
+        self.assertEqual(kwargs["inventory"], expected)
+        self.assertEqual(sorted(kwargs["day_dishes"]), sorted(self.t["day_plan"][0]["dishes"]))
+
+    def test_faint_hands_empty_v12_inventory_and_quan_still_opens(self):
+        sim = self.sim()
+        sim.sub.hold = [self._item(sim, "ca_loc")]
+        with mock.patch("chonoi.sim.day.QuanSim") as quan:
+            sim.sub._finish("fainted", [])  # ngất: giỏ bị bỏ
+            sim._open_quan([])
+        self.assertEqual(sim.phase, "quan")
+        self.assertEqual(quan.call_args.kwargs["inventory"], [])
+
+    def test_item_ids_keep_increasing_across_days(self):
+        sim = self.sim(days=2)
+        first = self._item(sim, "ca_loc")
+        self.assertEqual(first["id"], "I1")
+        with mock.patch("chonoi.sim.day.QuanSim") as quan:
+            quan.return_value.done, quan.return_value.money = True, 0
+            quan.return_value.earned, quan.return_value.reputation = 0, 3.0
+            sim.step(press("interact"))   # ngày 1: cập bến -> Quán (giả, kết thúc ngay)
+            sim.step(IDLE)                # Quán xong -> Shop
+            sim.step(IDLE)                # thả nút
+            sim.step(press("interact"))   # rời Shop -> ngày 2
+        self.assertEqual((sim.day, sim.phase), (2, "gather"))
+        self.assertIs(sim.sub.ids, sim.ids)  # cùng IdAllocator qua các ngày
+        self.assertEqual(sim.ids.new("I"), "I2")
 
     def test_money_and_reputation_carry_over_quan_starts_from_day_reputation(self):
         sim = self.sim(days=2)
