@@ -17,6 +17,7 @@
 - **Tôi đã làm (kèm link commit):**
   - Khởi tạo ma trận kiểm chứng Phase 2 với 12 tiêu chí AC-P2-01 đến AC-P2-12 ([docs/verification/phase-2.md](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/verification/phase-2.md)).
   - Kiểm thử độc lập Lát Cá Sấu của TV1 và kiểm tra hồi quy: 54/54 test toàn dự án đạt ([p2_monsters_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-2/p2_monsters_test.log)).
+  - Nâng cấp giao diện HUD trực quan ([chonoi/web/index.html](file:///e:/ai_thuc_chien/day_12_thuc_hanh/chonoi/web/index.html)): Bổ sung vẽ Cá Sấu M1/M2 dưới nước với vòng cảnh báo bán kính 10m, đổi màu đỏ rực khi rượt đuổi (`chase`) và hiển thị đếm ngược giật lùi (`recoil`).
 - **Tôi đã review (kèm link):**
   - Review commit `d24284f` của TV1 (`feat/p2-monsters`): Xác nhận Cá Sấu M1/M2 tuần tra, rượt đuổi, cắn rớt nửa giỏ LIFO, recoil và bất tử hoạt động đúng 100% theo contract v1.1.
 - **AI sai ở đâu và tôi phát hiện thế nào:**

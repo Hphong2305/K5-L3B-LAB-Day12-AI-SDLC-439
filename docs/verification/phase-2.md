@@ -13,7 +13,7 @@
 | **AC-P2-09** | Lát 4: Shop & Nâng cấp sang ngày hôm sau | Shop 600 tick, mua nâng cấp oxy/máu; xác nhận chỉ có hiệu lực từ Ngày tiếp theo | Sẽ lưu vào `docs/proof/phase-2/` | *Đang chờ TV4 code Shop* |
 | **AC-P2-10** | Lát 4: Cơ chế Tạm dừng (`pause`) | Khi pause: tick ngoài tăng nhưng `sim_tick`, `phase_tick` và các bộ đếm không chạy | Sẽ lưu vào `docs/proof/phase-2/` | *Đang chờ TV4 code Pause* |
 | **AC-P2-11** | Kiểm tra hồi quy (Regression Phase 1) | Chạy lại toàn bộ test suite Phase 1 dưới cấu hình và số liệu chuẩn mới v1.1 | [p2_monsters_test.log](file:///e:/ai_thuc_chien/day_12_thuc_hanh/docs/proof/phase-2/p2_monsters_test.log) | **ĐẠT (PASS - 54/54 tests)** |
-| **AC-P2-12** | HUD trực quan v1.1 | Hiển thị quái cá sấu, 2 bếp, 4 bàn, pause UI và cửa hàng Shop trên trình duyệt | Sẽ lưu snapshot giao diện | *Đang chuẩn bị* |
+| **AC-P2-12** | HUD trực quan v1.1 | Hiển thị quái cá sấu, 2 bếp, 4 bàn, pause UI và cửa hàng Shop trên trình duyệt | [chonoi/web/index.html](file:///e:/ai_thuc_chien/day_12_thuc_hanh/chonoi/web/index.html) | **ĐẠT (PASS - Đã code vẽ Cá Sấu M1/M2, vùng cảnh báo & trạng thái chase/recoil)** |
 
 ## Đánh giá ngắn Phase 2
 - **Yêu cầu đã đạt:**
