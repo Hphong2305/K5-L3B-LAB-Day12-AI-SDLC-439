@@ -11,5 +11,5 @@ TV4, Developer Quán (Phase 1: Lát 4; Phase 2: mode `day`).
 - **AI sai ở đâu và tôi phát hiện thế nào:**
   - Bếp nhận đơn `assigned` trong khi TV3 dùng `waiting`. Phát hiện khi đọc diff.
   - Khách rời khi món đang nấu làm kẹt quán (Q7). Script E2E bắt được qua kiểm bất biến.
-  - 30 phút game bị tính như 30 phút thật, dài hơn cả ca. Tôi quy đổi lại: 30 phút game = 1800 tick.
-- **Điều tôi học được:** chốt interface và tên trạng thái bằng văn bản trước khi code. Kiểm bất biến từng tick bắt được lỗi ở ranh giới hai lát mà unit test riêng lẻ bỏ sót.
+  - 30 phút game bị tính như 30 phút thật; tôi quy đổi lại thành 1800 tick.
+- **Điều tôi học được:** chốt interface bằng văn bản trước khi code; kiểm bất biến từng tick bắt lỗi ở ranh giới hai lát mà unit test bỏ sót.
