@@ -5,10 +5,12 @@ Nhóm viết tiếp (PRD-0 mục F, Quán):
                      ăn xong trả tiền (paid), boa, uy tín, hết ca (quan_end).
 """
 
+import math
 from collections import Counter
+from fractions import Fraction
 
 from ..errors import BadInput
-from ..ids import sort_by_id
+from ..ids import id_key, sort_by_id
 from ..inventory import format_item, to_fraction, validate_items
 from .ramp import ramp_velocity
 
@@ -285,25 +287,38 @@ class QuanSim:
             if c is None:
                 return
             # tiêu đúng phần đã giữ, xóa reserved trong cùng bước (thống nhất với TV3)
-            self._consume_reserved(c)
+            items = self._consume_reserved(c)
             # waiting -> assigned: khớp _load_customers của TV3 (chỉ đơn waiting mới giữ nguyên liệu).
             # TODO(TV4, Q1): xác nhận tên trạng thái với mục F.
             c["state"] = "assigned"
             dish = c["dish_id"]
             s.update(state="cooking", dish=dish, order_id=c.get("order_id"),
-                     cook_ticks_left=self._ticks(self.menu[dish]["cook_s"]), ready_ticks=0)
-            # TODO(TV4, mục E): đúng tên trường data của cook_started.
+                     cook_ticks_left=self._ticks(self.menu[dish]["cook_s"]), ready_ticks=0,
+                     base_price=self._base_price(dish, items))
+            # v1.2 (ADR-0003): cook_started.data.items = cá thể đã tiêu, sắp theo kind rồi id.
+            # TODO(TV4, mục E): đúng tên các trường còn lại của cook_started.
+            used = [format_item(it) for it in sorted(items, key=lambda it: (it["kind"], id_key(it["id"])))]
             events.append(("cook_started", {"stove_id": s["id"], "dish_id": dish,
-                                            "order_id": c.get("order_id")}))
+                                            "order_id": c.get("order_id"), "items": used}))
         elif s["state"] == "ready" and self.hand is None:
             # carry_limit = 1: tay trống mới bưng được.
             # TODO(TV4, mục F): định dạng `hand` trong snapshot (chuỗi mã món hay object có order_id).
             self.hand = {"dish_id": s["dish"], "order_id": s.get("order_id")}
+            if s.get("base_price") is not None:
+                self.hand["base_price"] = s["base_price"]  # giá chốt lúc nấu đi theo món
             if self.leftover_lifetime_ticks is not None:
                 self.hand["expires_at_tick"] = self.tick + self.leftover_lifetime_ticks
             events.append(("dish_picked", {"stove_id": s["id"], "dish_id": s["dish"],
                                            "order_id": s.get("order_id")}))
-            s.update(state="idle", dish=None, order_id=None, cook_ticks_left=0, ready_ticks=0)
+            s.update(state="idle", dish=None, order_id=None, cook_ticks_left=0, ready_ticks=0, base_price=None)
+
+    def _base_price(self, dish, items) -> int:
+        """v1.2: base_price = floor(listed_price * avg_fresh / 100), fresh lấy lúc bếp tiêu (Fraction, chính xác)."""
+        listed = self.menu[dish]["price"]
+        if not items:
+            return listed  # TODO(TV4, TICKET-03): món không có cá thể nào (fixture) -> giữ giá niêm yết
+        avg = sum((to_fraction(it["fresh"]) for it in items), Fraction(0)) / len(items)
+        return math.floor(listed * avg / 100)
 
     def enable_live_leftovers(self):
         """Sáng tạo của nhóm (ADR-0001), chỉ chonoi.live gọi: bật bảo quản món thừa.
@@ -363,7 +378,8 @@ class QuanSim:
         if self.hand.get("order_id") != c.get("order_id"):
             return  # TODO(TV4, mục F): bưng sai đơn -> bỏ qua hay phát sự kiện riêng?
         dish = c["dish_id"]
-        price = self.menu[dish]["price"]
+        # v1.2: giá = base_price chốt lúc nấu; món dựng sẵn không có base_price thì dùng giá niêm yết.
+        price = self.hand.get("base_price", self.menu[dish]["price"])
         # Gợi ý từ scenario.py: khách eating mang sẵn giá/tip -> tính boa lúc phục vụ (clarify Q4).
         c["price"] = price
         c["tip"] = self._tip(price, c)
@@ -374,12 +390,12 @@ class QuanSim:
                                   "order_id": c.get("order_id")}))
 
     def _tip(self, price, c) -> int:
-        """Boa = floor(price * tip_rate) nếu kiên nhẫn còn >= tip_min_patience_ratio (clarify Q4)."""
+        """Boa = floor(price * tip_rate), price = base_price (v1.2), nếu kiên nhẫn còn >= tip_min_patience_ratio (Q4)."""
         full = self._ticks(self.t["patience_s"])
         ratio = c.get("patience_ticks_left", 0) / full if full else 0
         # TODO(TV4, Q4): ngưỡng là >= hay >; floor áp vào giá trị nào.
         if ratio >= self.t["tip_min_patience_ratio"]:
-            return int(price * self.t["tip_rate"] // 1)
+            return math.floor(Fraction(price) * to_fraction(self.t["tip_rate"]))
         return 0
 
     def _pay(self, c, events):
