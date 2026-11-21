@@ -22,3 +22,41 @@ Starter lưu khách trong `self.customers` và nguyên liệu giữ chỗ trong 
 
 1. Khách gọi món, bếp nhận đơn và trừ đúng nguyên liệu một lần.
 2. Khách rời trước khi bếp nhận đơn, giải phóng phần giữ để nguyên liệu khả dụng trở lại.
+
+## Phản hồi TV4
+
+### Đồng ý
+
+- Dữ liệu dùng chung: `self.customers`, `customer["reserved"]`, `order_id`, `order_tick`, mã món, trạng thái đơn, `patience_ticks_left`.
+- Cách giữ, trừ, nhả nguyên liệu: `self.stock` chỉ đổi khi bếp nhận đơn; TV4 trừ kho và xóa `reserved` trong cùng bước; TV3 nhả `reserved` khi khách rời.
+- Phân vùng code và mỗi người viết logic trong hàm riêng.
+
+### Đề xuất thêm
+
+1. **Người ghép `step()`:** TV4 ghép, vì phần lớn lời gọi (bếp, ăn, interact, kết ca) thuộc Lát 4. TV3 review diff `step()` trước khi tích hợp.
+2. **Thứ tự trong `step()`** (theo gợi ý của starter, đối chiếu lại với mục F trước khi chốt):
+   1. Đồng hồ: `time_left_ticks`.
+   2. TV3: giảm kiên nhẫn, khách hết kiên nhẫn thì rời (`customer_left`) và nhả `reserved`.
+   3. TV4: bếp đếm `cook_ticks_left`, chín thì sang `ready` (`dish_ready`).
+   4. TV4: khách ăn đếm thời gian, ăn xong thì trả tiền (`paid`).
+   5. Di chuyển người chơi.
+   6. TV4: tối đa một interact (cạnh lên), chọn theo khoảng cách, bếp trước bàn, rồi id.
+   7. TV3: khách mới theo lịch, chọn món, giữ nguyên liệu (`customer_arrived` / `no_dish`).
+   8. TV4: hết ca, xử lý khách còn lại và phát `quan_end`.
+3. **Khách hết kiên nhẫn đúng tick người chơi bưng món tới:** nếu giữ thứ tự trên thì khách rời ở bước 2, interact ở bước 6 không còn khách để phục vụ, món vẫn trên tay. Cần đối chiếu mục F; nếu mục F không nói rõ thì ghi `docs/clarify.md` và nhờ PO hỏi.
+4. **Ai xóa khách khỏi `self.customers`:** TV3 xóa khi khách rời; TV4 xóa khi khách trả tiền xong. Bàn được coi là có khách qua `customer["table_id"]` (như `snapshot()` hiện tại).
+5. **TV4 cập nhật đơn ở các mốc:** bếp nhận đơn (đơn sang trạng thái đang nấu), bưng món (`hand` giữ món kèm `order_id`), phục vụ (khách sang trạng thái đang ăn). Tên trạng thái lấy đúng theo mục F.
+
+### Cần TV3 xác nhận
+
+- [ ] Danh sách trạng thái đơn và tên chính xác theo mục F.
+- [ ] Kiên nhẫn có tiếp tục giảm khi đơn đang nấu hoặc khách đang ăn không.
+- [ ] "Đơn chờ cũ nhất" mà bếp lấy: sắp theo `order_tick`, hòa thì theo `order_id`?
+- [ ] Điều kiện boa: so `patience_ticks_left` tại lúc phục vụ hay lúc trả tiền với `tip_min_patience_ratio`; cách làm tròn (floor) và trường hợp đúng bằng ngưỡng.
+- [ ] Hết ca: khách đang ăn / đang chờ xử lý thế nào, có phát `customer_left` hoặc `paid` trước `quan_end` không.
+
+### Test TV4 sẽ viết
+
+Dùng `scenario.customers[]` dựng sẵn khách và đơn để không phụ thuộc lịch khách đến của TV3:
+nấu đúng `cook_s`, bưng khi tay đầy, phục vụ sai/đúng `order_id`, boa sát ngưỡng, thanh toán, kết ca.
+Hai ca tích hợp ở mục trên TV3 và TV4 cùng chạy sau khi ghép.
