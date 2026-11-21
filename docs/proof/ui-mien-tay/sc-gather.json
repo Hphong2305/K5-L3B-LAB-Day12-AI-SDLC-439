@@ -1,0 +1,3 @@
+{"gather": {"player": {"pos": [34, 7], "heading_deg": 0, "oxygen_ticks": 1300},
+  "hold": [{"id": "I1", "kind": "ca_loc", "fresh": 96}, {"id": "I2", "kind": "ca_linh", "fresh": 80}, {"id": "I3", "kind": "bong_sung", "fresh": 70},
+           {"id": "I4", "kind": "bong_dien_dien", "fresh": 55}, {"id": "I5", "kind": "ca_keo", "fresh": 40}, {"id": "I6", "kind": "keo_neo", "fresh": 25}]}}
