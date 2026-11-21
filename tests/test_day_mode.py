@@ -103,10 +103,18 @@ class DayMode(unittest.TestCase):
     # --- bàn giao giữa các pha --------------------------------------------------
     def test_gather_hold_becomes_quan_stock_with_day_menu(self):
         sim = self.sim()
-        sim.sub.hold = ["ca_loc", "bong_sung", "bong_sung"]
+        sim.sub.hold = [
+            {"id": "I1", "kind": "ca_loc", "fresh": 100},
+            {"id": "I2", "kind": "bong_sung", "fresh": 100},
+            {"id": "I3", "kind": "bong_sung", "fresh": 100},
+        ]
         sim.step(press("interact"))  # đứng ở bến -> docked
         self.assertEqual(sim.phase, "quan")
-        self.assertEqual(sim.sub.stock, {"bong_sung": 2, "ca_loc": 1})
+        self.assertEqual(sim.sub.stock, [
+            {"id": "I1", "kind": "ca_loc", "fresh": 99.992},
+            {"id": "I2", "kind": "bong_sung", "fresh": 99.992},
+            {"id": "I3", "kind": "bong_sung", "fresh": 99.992},
+        ])
         self.assertEqual(sim.sub.orderable_dishes, sorted(self.t["day_plan"][0]["dishes"]))
 
     def test_money_and_reputation_carry_over_quan_starts_from_day_reputation(self):

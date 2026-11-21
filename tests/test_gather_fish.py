@@ -76,7 +76,10 @@ class GatherFish(unittest.TestCase):
         events_out = sim.step(press("catch"))
 
         self.assertEqual([name for name, _ in events_out if name == "fish_caught"], ["fish_caught"])
-        self.assertEqual(sim.hold, ["ca_linh"] * 3)
+        self.assertEqual(sim.hold, [
+            {"id": f"I{i}", "kind": "ca_linh", "fresh": sim.initial_fresh}
+            for i in range(1, 4)
+        ])
         self.assertEqual(sim.fish, [])
 
     def test_new_species_yield_and_new_node_kind(self):
@@ -86,13 +89,18 @@ class GatherFish(unittest.TestCase):
         })
         caught = catch_sim.step(press("catch"))
         self.assertEqual(caught[0][1]["yield"], 2)
-        self.assertEqual(catch_sim.hold, ["ca_keo", "ca_keo"])
+        self.assertEqual(catch_sim.hold, [
+            {"id": "I1", "kind": "ca_keo", "fresh": catch_sim.initial_fresh},
+            {"id": "I2", "kind": "ca_keo", "fresh": catch_sim.initial_fresh},
+        ])
 
         gather_sim = build_sim({"player": {"pos": [76, 0]}})
         gathered = gather_sim.step(press("interact"))
         self.assertEqual(gathered[0][0], "gather")
         self.assertEqual(gathered[0][1]["kind"], "keo_neo")
-        self.assertEqual(gather_sim.inventory_items(), {"keo_neo": 1})
+        self.assertEqual(gather_sim.inventory_items(), [
+            {"id": "I1", "kind": "keo_neo", "fresh": 100},
+        ])
 
     def test_spawns_at_360_after_swimming_and_new_school_moves_next_tick(self):
         first = build_sim(seed=31)
