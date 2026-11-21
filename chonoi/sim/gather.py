@@ -1,4 +1,4 @@
-"""Buổi sáng — Lặn & Hái (`gather`). KHUNG: bơi, chặn mép, đồng hồ, cập bến, xuất kho.
+"""Buổi sáng — Lặn & Hái (`gather`): bơi, cá, thủy quái, cập bến và xuất kho.
 
 Mặt cắt dòng sông nhìn NGANG: vị trí `[x, d]` (x sang phải, `d` độ sâu hướng xuống, d = 0 là mặt nước).
 `move = [x, d]`: thành phần thứ hai DƯƠNG = bơi xuống. Hướng mặt là góc từ +x, dương = xuống.
@@ -6,18 +6,8 @@ Mặt cắt dòng sông nhìn NGANG: vị trí `[x, d]` (x sang phải, `d` đ�
 Đã làm sẵn để smoke test chạy được: bơi + tăng/giảm tốc, chặn mép (d không âm), đồng hồ và hết giờ,
 cập bến (`interact` trong vùng bến -> `gather_end` reason `docked`), xuất kho, snapshot đầy đủ trường gather.
 
-Nhóm viết tiếp (đúng thứ tự một bước trong PRD mục 13.8, "Gather"):
-  TODO(nhóm, lát 1): bơi + oxy + biên + giỏ
-      - oxy: dưới nước (d > surface_depth) trừ 1 tick/tick, mặt nước hồi oxygen_refill_per_tick, kẹp [0, max]
-      - ngạt: oxy = 0 và đang dưới nước -> đếm zero_oxy_ticks, đủ choke_interval_ticks thì -1 Máu (choke)
-      - Máu về 0 -> ngất (faint, gather_end reason `fainted`, mất toàn bộ giỏ, kho rỗng)
-      - sự kiện dive / surface / oxygen_empty / choke / faint
-      - giỏ: thứ tự nhặt (LIFO), sức chứa hold_capacity
-  Lát 2: hái nút ở mặt nước, bắt cá dưới nước, ưu tiên cập bến và xuất kho.
-      - hành động chọn mục tiêu gần nhất trong bán kính, hòa theo ID
-      - đủ chỗ mới nhận trọn yield; nút regrow và cá có hồi chiêu theo tuning
-      - runner ghi kho nguyên tử đúng một lần sau gather_end
-Các tính năng của phase sau chưa nằm trong khung này.
+Lát 1 xử lý bơi, oxy, ngạt, Máu, giỏ và thủy quái. Lát 2 xử lý hái, bắt cá,
+cá bơi/sinh và xuất kho. Các số liệu luật chơi lấy từ game.contract.json.
 """
 
 import math
@@ -57,21 +47,18 @@ class GatherSim:
         src_nodes = scenario["nodes"] if "nodes" in scenario else t["nodes"]
         self.nodes = [{"id": n["id"], "kind": n["kind"], "pos": [float(c) for c in n["pos"]],
                        "regrow_ticks": n.get("regrow_ticks", 0)} for n in src_nodes]
+        self.random_fish = scenario.get("random_fish", True)
         if "fish" in scenario:
             src_fish = scenario["fish"]
-        elif scenario.get("random_fish", True):
+        elif self.random_fish:
             src_fish = t.get("fish_initial", [])
-            if isinstance(src_fish, int):
-                src_fish = [
-                    {"id": f"F{i+1}", "kind": ("ca_linh", "ca_loc", "ca_keo")[i % 3],
-                     "pos": [15.0 + (i % 6) * 15.0, 5.0 + (i // 3) * 5.0], "heading_deg": 0}
-                    for i in range(src_fish)
-                ]
         else:
             src_fish = []
-        # Đàn cá đứng yên ở phase này. Cá bơi / sinh thêm do TV2 triển khai.
+        initial_count = src_fish if isinstance(src_fish, int) else 0
         self.fish = [{"id": f["id"], "kind": f["kind"], "pos": [float(c) for c in f["pos"]],
-                      "heading_deg": f.get("heading_deg", 0)} for f in src_fish]
+                      "heading_deg": f.get("heading_deg", 0), "age_ticks": f.get("age_ticks", 0)}
+                     for f in src_fish] if isinstance(src_fish, list) else []
+        self.phase_tick = 0
 
         # Thủy quái (Cá Sấu) — TV1 phụ trách
         self.day = scenario.get("day", 1)
@@ -110,6 +97,12 @@ class GatherSim:
         for coll in (self.nodes, self.fish, self.monsters):
             for e in coll:
                 ids.reserve(e["id"])
+        if initial_count:
+            for _ in range(initial_count):
+                fish = self._new_fish()
+                if fish is None:
+                    break
+                self.fish.append(fish)
         self.money = 0
         self.earned = 0
         self.reputation = tuning["quan"]["reputation_initial"]
@@ -132,7 +125,8 @@ class GatherSim:
             "nodes": [{"id": n["id"], "pos": n["pos"], "kind": n["kind"],
                        "ready": n["regrow_ticks"] == 0, "regrow_ticks": n["regrow_ticks"]}
                       for n in sort_by_id(self.nodes)],
-            "fish": [{"id": f["id"], "pos": f["pos"], "kind": f["kind"], "heading_deg": f.get("heading_deg", 0)}
+            "fish": [{"id": f["id"], "pos": f["pos"], "kind": f["kind"],
+                      "heading_deg": f["heading_deg"], "age_ticks": f["age_ticks"]}
                      for f in sort_by_id(self.fish)],
             "monsters": [{"id": m["id"], "kind": m["kind"], "pos": m["pos"],
                           "waypoints": m["waypoints"], "target_idx": m["target_idx"],
@@ -144,6 +138,7 @@ class GatherSim:
     # --- một bước ---------------------------------------------------------------
     def step(self, inp):
         events = []
+        self.phase_tick += 1
         # 1. đồng hồ và hàng có sẵn: giảm bộ đếm, nút mọc lại
         self.time_left_ticks = max(0, self.time_left_ticks - 1)
         self.invuln_ticks = max(0, self.invuln_ticks - 1)
@@ -206,7 +201,8 @@ class GatherSim:
             return events
 
         # 7. Khi còn giờ: cá bơi, cá sinh (TV2)
-        self._move_fish()
+        if self.random_fish:
+            self._move_fish()
         self._spawn_fish(events)
         return events
 
@@ -254,6 +250,7 @@ class GatherSim:
         self.hold.extend([fish["kind"]] * amount)
         self.catch_cd_ticks = int(round(self.t["catch_cooldown_s"] * TICK))
         events.append(("fish_caught", {"fish_id": fish["id"], "kind": fish["kind"], "yield": amount}))
+        self.fish.remove(fish)
 
     def _move(self, inp):
         speed = self.t["swim_speed"]
@@ -390,9 +387,101 @@ class GatherSim:
 
         return False
 
-    # Điểm nối cho TV2 triển khai cá bơi và cá sinh
+    def _fish_spawn_candidates(self):
+        x_values = self.t["fish_spawn_x"]
+        depths = self.t["fish_spawn_depths"]
+        clearance = self.t["fish_spawn_clearance"]
+        candidates = {}
+        for kind in sorted(self.t["fish_yield"]):
+            points = []
+            for x in x_values:
+                for d in depths[kind]:
+                    pos = [float(x), float(d)]
+                    if all(math.dist(pos, fish["pos"]) > clearance for fish in self.fish):
+                        points.append(pos)
+            if points:
+                candidates[kind] = points
+        return candidates
+
+    def _new_fish(self):
+        candidates = self._fish_spawn_candidates()
+        if not candidates:
+            return None
+        kinds = list(candidates)
+        weights = [self.t["fish_weights"][kind] for kind in kinds]
+        rng = self.rng.get("fish_spawn")
+        kind = rng.choices(kinds, weights=weights, k=1)[0]
+        pos = rng.choice(candidates[kind])
+        return {
+            "id": self.ids.new("F"),
+            "kind": kind,
+            "pos": pos,
+            "heading_deg": rng.uniform(0.0, 360.0),
+            "age_ticks": 0,
+        }
+
     def _move_fish(self):
-        pass
+        speed = self.t["fish_speed"] / TICK
+        turn_ticks = self.t["fish_turn_ticks"]
+        turn_rng = self.rng.get("fish_turn")
+        x_bounds = self.t["fish_x"]
+        for fish in sort_by_id(self.fish):
+            fish["age_ticks"] += 1
+            if fish["age_ticks"] % turn_ticks == 0:
+                fish["heading_deg"] = turn_rng.uniform(0.0, 360.0)
+            self._move_fish_with_reflection(fish, speed, x_bounds, self.t["fish_depths"][fish["kind"]])
+
+    @staticmethod
+    def _move_fish_with_reflection(fish, distance, x_bounds, depth_bounds):
+        x, d = fish["pos"]
+        angle = math.radians(fish["heading_deg"])
+        vx, vd = math.cos(angle), math.sin(angle)
+        remaining = distance
+        epsilon = 1e-12
+
+        for _ in range(8):
+            if remaining <= epsilon:
+                break
+            x_hit = ((x_bounds[1] - x) / vx) if vx > epsilon else (
+                (x_bounds[0] - x) / vx if vx < -epsilon else math.inf
+            )
+            d_hit = ((depth_bounds[1] - d) / vd) if vd > epsilon else (
+                (depth_bounds[0] - d) / vd if vd < -epsilon else math.inf
+            )
+            hit_distance = min(x_hit, d_hit)
+            if hit_distance < -epsilon:
+                hit_distance = 0.0
+            if hit_distance > remaining + epsilon:
+                x += vx * remaining
+                d += vd * remaining
+                remaining = 0.0
+                break
+
+            travel = max(0.0, hit_distance)
+            x += vx * travel
+            d += vd * travel
+            remaining = max(0.0, remaining - travel)
+            if abs(x_hit - hit_distance) <= epsilon:
+                x = x_bounds[1] if vx > 0 else x_bounds[0]
+                vx = -vx
+            if abs(d_hit - hit_distance) <= epsilon:
+                d = depth_bounds[1] if vd > 0 else depth_bounds[0]
+                vd = -vd
+
+        fish["pos"] = [x, d]
+        fish["heading_deg"] = math.degrees(math.atan2(vd, vx)) % 360.0
 
     def _spawn_fish(self, events):
-        pass
+        spawn_ticks = self.t["fish_spawn_ticks"]
+        if (not self.random_fish or self.phase_tick % spawn_ticks != 0
+                or len(self.fish) >= self.t["fish_max"]):
+            return
+        fish = self._new_fish()
+        if fish is None:
+            return
+        self.fish.append(fish)
+        events.append(("fish_spawned", {
+            "id": fish["id"],
+            "kind": fish["kind"],
+            "pos": list(fish["pos"]),
+        }))
