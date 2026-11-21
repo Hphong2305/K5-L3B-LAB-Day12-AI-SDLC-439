@@ -1,7 +1,7 @@
 {
   "contract_version": "1.2",
   "extensions": ["current"],
-  "team": "nhom-05",
+  "team": "439",
   "team_size": 5,
   "build_cmd": "true",
   "run_cmd": "python3 -m chonoi.live --mode gather",
