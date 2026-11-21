@@ -24,7 +24,8 @@ class QuanSim:
         self.rng = streams
         self.ids = ids
         self.tick = 0
-        self.leftover_lifetime_ticks = None
+        self._tuning = tuning
+        self.leftover_lifetime_ticks = None  # None = tắt (headless); bật qua enable_live_leftovers()
         self.stored_dishes = []
         tick_hz = tuning["tick_hz"]
         self.patience_ticks = round(t["patience_s"] * tick_hz)
@@ -237,6 +238,18 @@ class QuanSim:
             events.append(("dish_picked", {"stove_id": s["id"], "dish_id": s["dish"],
                                            "order_id": s.get("order_id")}))
             s.update(state="idle", dish=None, order_id=None, cook_ticks_left=0, ready_ticks=0)
+
+    def enable_live_leftovers(self):
+        """Sáng tạo của nhóm (ADR-0001), chỉ chonoi.live gọi: bật bảo quản món thừa.
+
+        Đổi thời gian game sang tick theo tuning.live: một ca `quan.duration_s` giây thật
+        ứng với `quan_shift_game_hours` giờ game. Với 180 s / 3 giờ: 1 phút game = 1 s,
+        nên 30 phút game = 30 s = 1800 tick.
+        """
+        live = self._tuning["live"]
+        seconds_per_game_minute = self.t["duration_s"] / (live["quan_shift_game_hours"] * 60)
+        self.leftover_lifetime_ticks = int(round(
+            live["leftover_lifetime_game_minutes"] * seconds_per_game_minute * self._tuning["tick_hz"]))
 
     def _has_live_order(self, dish):
         order_id = dish.get("order_id")

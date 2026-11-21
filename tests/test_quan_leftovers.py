@@ -13,8 +13,13 @@ class QuanLeftovers(unittest.TestCase):
     def test_live_only_and_thirty_game_minutes(self):
         live = LiveGame("quan", self.tuning, {}, 42)
         headless = Session("quan", self.tuning, {}, 42)
-        self.assertEqual(live.session.sim.leftover_lifetime_ticks,
-                         30 * 60 * self.tuning["tick_hz"])
+        # ca 180 s thật = 3 giờ game -> 30 phút game = 30 s = 1800 tick
+        cfg = self.tuning["live"]
+        seconds_per_game_minute = self.tuning["quan"]["duration_s"] / (cfg["quan_shift_game_hours"] * 60)
+        expected = round(cfg["leftover_lifetime_game_minutes"] * seconds_per_game_minute * self.tuning["tick_hz"])
+        self.assertEqual(live.session.sim.leftover_lifetime_ticks, expected)
+        self.assertEqual(expected, 1800)  # với contract hiện tại
+        self.assertLess(expected, self.tuning["quan"]["duration_s"] * self.tuning["tick_hz"])
         self.assertIsNone(headless.sim.leftover_lifetime_ticks)
 
     def test_return_and_reuse_without_consuming_stock_again(self):

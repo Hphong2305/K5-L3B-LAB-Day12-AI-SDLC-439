@@ -71,6 +71,7 @@
       "goi_bong_sung": {"recipe": {"bong_sung": 2}, "cook_s": 4, "price": 40},
       "lau_ca_linh_dien_dien": {"recipe": {"ca_linh": 3, "bong_dien_dien": 1}, "cook_s": 10, "price": 120}
     },
-    "score": {"reputation_multiplier": 100}
+    "score": {"reputation_multiplier": 100},
+    "live": {"quan_shift_game_hours": 3, "leftover_lifetime_game_minutes": 30}
   }
 }
